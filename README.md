@@ -1,0 +1,1 @@
+A RoyaleAPI Python wrapper.
