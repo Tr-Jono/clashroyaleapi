@@ -1,14 +1,13 @@
 from crapi.achievement import Achievement
-from crapi.arena import Arena
 from crapi.card import Card
 from crapi.clan import Clan
-from crapi.base import CRObject
+from crapi.person import Person
 from crapi.player_stats import PlayerStats
 from crapi.player_games import PlayerGames
 from crapi.player_league_stats import PlayerLeagueStats
 
 
-class Player(CRObject):
+class Player(Person):
     def __init__(self,
                  tag=None,
                  name=None,
@@ -23,11 +22,8 @@ class Player(CRObject):
                  current_deck=None,
                  cards=None,
                  achievements=None):
-        self.tag = tag
-        self.name = name
-        self.trophies = trophies
+        super().__init__(tag, name, trophies, arena)
         self.rank = rank
-        self.arena = Arena.de_json(arena)
         self.clan = Clan.de_json(clan)
         self.stats = PlayerStats.de_json(stats)
         self.games = PlayerGames.de_json(games)
@@ -37,19 +33,9 @@ class Player(CRObject):
         self.cards = Card.de_list(cards)
         self.achievements = Achievement.de_list(achievements)
 
-        self._id_attrs = None
-        if self.tag:
-            self._id_attrs = (self.tag,)
-
     @classmethod
     def de_json(cls, data):
         if not data:
             return None
-        data = super(Player, cls).de_json(data)
+        data = super().de_json(data)
         return cls(**data)
-
-    @classmethod
-    def de_list(cls, data):
-        if not data:
-            return []
-        return [cls.de_json(player) for player in data]

@@ -37,20 +37,6 @@ class CRObject:
                     data[key] = value.to_dict()
                 else:
                     data[key] = value
-        if data.get('battle_type'):
-            data["type"] = data.pop("battle_type", None)
-        if data.get('clan_type'):
-            data["type"] = data.pop("clan_type", None)
-        if data.get("tournament_type"):
-            data["type"] = data.pop("tournament_type", None)
-        if data.get("card_type"):
-            data["type"] = data.pop("card_type", None)
-        if data.get("card_id"):
-            data["id"] = data.pop("card_id", None)
-        if data.get("season_id"):
-            data["id"] = data.pop("season_id", None)
-        if data.get('time'):
-            data['time'] = data.pop('utc_time', None)
         return data
 
     def __eq__(self, other):

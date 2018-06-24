@@ -14,7 +14,7 @@ class ClanBadge(CRObject):
     def de_json(cls, data):
         if not data:
             return None
-        data = super(ClanBadge, cls).de_json(data)
+        data = super().de_json(data)
         if data.get("id"):
             data["badge_id"] = data.pop("id")
         return cls(**data)
