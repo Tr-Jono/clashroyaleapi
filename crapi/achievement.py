@@ -2,11 +2,12 @@ from crapi.base import CRObject
 
 
 class Achievement(CRObject):
-    def __init__(self, name, stars, value, target):
+    def __init__(self, name, stars, value, target, info):
         self.name = name
         self.stars = stars
         self.value = value
         self.target = target
+        self.info = info
 
         self._id_attrs = (self.name,)
 

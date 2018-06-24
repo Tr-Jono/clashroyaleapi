@@ -49,6 +49,8 @@ class CRObject:
             data["id"] = data.pop("card_id", None)
         if data.get("season_id"):
             data["id"] = data.pop("season_id", None)
+        if data.get('time'):
+            data['time'] = data.pop('utc_time', None)
         return data
 
     def __eq__(self, other):

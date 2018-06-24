@@ -45,6 +45,10 @@ class Card(CRObject):
         if not data:
             return None
         data = super(Card, cls).de_json(data)
+        if data.get("type"):
+            data["card_type"] = data.pop("type")
+        if data.get("id"):
+            data["card_id"] = data.pop("id")
         return cls(**data)
 
     @classmethod

@@ -1,6 +1,3 @@
-# GAMES NOT FINISHED, PLAYER.__INIT__ NOT DONE
-# CHECK IF ALL STUFF IN __INIT__.PY
-
 from crapi.achievement import Achievement
 from crapi.arena import Arena
 from crapi.card import Card
@@ -49,8 +46,6 @@ class Player(CRObject):
         if not data:
             return None
         data = super(Player, cls).de_json(data)
-        if all(v is None for v in data.values()):
-            return None
         return cls(**data)
 
     @classmethod
