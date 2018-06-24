@@ -33,7 +33,7 @@ print(player.name, player.clan.donations_delta, player.stats.favorite_card.card_
 
 
 # Method to obtain multiple Clan objects. Use Client.get_clan(tag) for obtaining a single Clan object.
-# Keys & exclude also work, use a iterable to give multiple arguments to them.
+# Keys & exclude also work, use an iterable to give multiple arguments to them.
 newhkclan123, hkclansecond = client.get_clans(("C9C8PCP", "8LYRRV2"), exclude="members")
 
 # You can compare objects directly.
