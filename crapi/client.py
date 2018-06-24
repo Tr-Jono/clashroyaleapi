@@ -69,10 +69,11 @@ class Client:
             warnings.warn("Keys and exclude should not be used together. Exclude is changed to None.")
         if not is_iterable(keys) and is_non_empty_str(keys):
             keys = (keys,)
-        if not is_iterable(exclude) and is_non_empty_str(keys):
+        if not is_iterable(exclude) and is_non_empty_str(exclude):
             exclude = (exclude,)
         # Check keys, exclude and kwargs
         for param in keys, exclude, kwargs:
+            print(param)
             if param is None:
                 continue
             elif is_iterable(param):
@@ -101,7 +102,8 @@ class Client:
                         endpoint += f"{key}={','.join(param_dict[key])}"
                     else:
                         endpoint += f"{key}={param_dict[key]}&"
-            endpoint = endpoint[:-1]  # remove the last "&"
+            if endpoint.endswith("&"):
+                endpoint = endpoint[:-1]  # remove the last "&"
         return self._request(endpoint)
 
     def get_version(self):
