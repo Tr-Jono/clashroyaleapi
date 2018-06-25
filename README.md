@@ -7,7 +7,8 @@ You are recommended to read [RoyaleAPI's documentation](https://docs.royaleapi.c
 before using this wrapper.
 
 Documentation will be written after at least half of the endpoints are coded.
-For now, you may reference the short example below.
+For now, you may reference the
+[short example](https://github.com/Tr-Jono/clashroyaleapi#short-example-of-using-the-wrapper) below.
 
 Note that only Python 3.6 is supported. Because of f-strings (there's like 10 or less?). Yay.
 

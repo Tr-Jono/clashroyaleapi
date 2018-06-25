@@ -7,7 +7,7 @@ from royaleapi.player import Player
 from royaleapi.utils import validate_tag, is_iterable, is_non_empty_str
 from royaleapi.constants import API_BASE_URL
 from royaleapi.error import (InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized, NotFound,
-                             InternalServerError, ServerUnderMaintenance, ServerOffline)
+                             ServerError, ServerUnderMaintenance, ServerOffline)
 
 
 class Client:
@@ -50,7 +50,7 @@ class Client:
                 elif status == 404:
                     raise NotFound(message)
                 elif status == 500:
-                    raise InternalServerError(message)
+                    raise ServerError(message)
                 elif status == 503:
                     raise ServerUnderMaintenance(message)
                 elif status == 522:

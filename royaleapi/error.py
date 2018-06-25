@@ -40,17 +40,17 @@ class NotFound(RequestError):
     pass
 
 
-class ServerError(CRError):
+class ServiceUnavailable(CRError):
     pass
 
 
-class InternalServerError(ServerError):
+class ServerError(ServiceUnavailable):
     pass
 
 
-class ServerUnderMaintenance(ServerError):
+class ServerUnderMaintenance(ServiceUnavailable):
     pass
 
 
-class ServerOffline(ServerError):
+class ServerOffline(ServiceUnavailable):
     pass
