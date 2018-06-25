@@ -1,10 +1,10 @@
-from crapi.achievement import Achievement
-from crapi.card import Card
-from crapi.clan import Clan
-from crapi.person import Person
-from crapi.player_stats import PlayerStats
-from crapi.player_games import PlayerGames
-from crapi.player_league_stats import PlayerLeagueStats
+from royaleapi.achievement import Achievement
+from royaleapi.card import Card
+from royaleapi.clan import Clan
+from royaleapi.person import Person
+from royaleapi.player_stats import PlayerStats
+from royaleapi.player_games import PlayerGames
+from royaleapi.player_league_stats import PlayerLeagueStats
 
 
 class Player(Person):

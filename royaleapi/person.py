@@ -1,5 +1,5 @@
-from crapi.base import CRObject
-from crapi.arena import Arena
+from royaleapi.base import CRObject
+from royaleapi.arena import Arena
 
 
 class Person(CRObject):

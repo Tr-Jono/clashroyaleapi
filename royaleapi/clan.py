@@ -1,8 +1,8 @@
-from crapi.base import CRObject
-from crapi.clan_badge import ClanBadge
-from crapi.clan_member import ClanMember
-from crapi.location import Location
-from crapi.tracking import Tracking
+from royaleapi.base import CRObject
+from royaleapi.clan_badge import ClanBadge
+from royaleapi.clan_member import ClanMember
+from royaleapi.location import Location
+from royaleapi.tracking import Tracking
 
 
 class Clan(CRObject):

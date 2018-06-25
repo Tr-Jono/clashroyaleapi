@@ -1,5 +1,5 @@
-from crapi.base import CRObject
-from crapi.card import Card
+from royaleapi.base import CRObject
+from royaleapi.card import Card
 
 
 class PlayerStats(CRObject):

@@ -16,7 +16,7 @@ Follow [these instructions](https://docs.royaleapi.com/#/authentication?id=gener
 to obtain your developer key.
 
 ```python
-from crapi import Client
+from royaleapi import Client
 
 
 client = Client("DEV_KEY")  # Your developer key.

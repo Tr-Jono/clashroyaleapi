@@ -1,5 +1,5 @@
-from crapi.base import CRObject
-from crapi.player_league_season import PlayerLeagueSeason
+from royaleapi.base import CRObject
+from royaleapi.player_league_season import PlayerLeagueSeason
 
 
 class PlayerLeagueStats(CRObject):

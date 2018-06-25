@@ -1,4 +1,4 @@
-from crapi.person import Person
+from royaleapi.person import Person
 
 
 class ClanMember(Person):

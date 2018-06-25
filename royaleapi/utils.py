@@ -1,8 +1,8 @@
 import re
 from types import GeneratorType
 
-from crapi.constants import VALID_TAG_CHARS
-from crapi.error import InvalidTag
+from royaleapi.constants import VALID_TAG_CHARS
+from royaleapi.error import InvalidTag
 
 
 def camel_to_underscore(name):

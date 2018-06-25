@@ -1,4 +1,4 @@
-from crapi.base import CRObject
+from royaleapi.base import CRObject
 
 
 class Location(CRObject):

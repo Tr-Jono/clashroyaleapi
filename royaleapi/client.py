@@ -2,11 +2,12 @@ import json
 import requests
 import warnings
 
-from crapi.player import Player, Clan
-from crapi.utils import validate_tag, is_iterable, is_non_empty_str
-from crapi.constants import API_BASE_URL
-from crapi.error import (InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized, NotFound, InternalServerError,
-                         ServerUnderMaintenance, ServerOffline)
+from royaleapi.clan import Clan
+from royaleapi.player import Player
+from royaleapi.utils import validate_tag, is_iterable, is_non_empty_str
+from royaleapi.constants import API_BASE_URL
+from royaleapi.error import (InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized, NotFound,
+                             InternalServerError, ServerUnderMaintenance, ServerOffline)
 
 
 class Client:

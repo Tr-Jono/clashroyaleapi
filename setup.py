@@ -13,6 +13,7 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Natural Language :: English",
+        "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
         "Topic :: Games/Entertainment"
     ],
@@ -21,7 +22,7 @@ setup(
     author="Trainer Jono",
     author_email="omgthisissouseless@gmail.com",
     license="GNU General Public License v3.0",
-    packages=["crapi"],
+    packages=["royaleapi"],
     install_requires=[
         "requests"
     ],
