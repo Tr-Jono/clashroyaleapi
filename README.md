@@ -3,7 +3,8 @@
 A [RoyaleAPI](https://royaleapi.com/) Python wrapper,
 based on [jeffffc](https://github.com/jeffffc)'s [crpy](https://test.pypi.org/project/crpy/).
 
-You are suggested to read [RoyaleAPI's documentation](https://docs.royaleapi.com/#/) before using this wrapper.
+You are recommended to read [RoyaleAPI's documentation](https://docs.royaleapi.com/#/)
+before using this wrapper.
 
 Documentation will be written after at least half of the endpoints are coded.
 For now, you may reference the short example below.
@@ -18,22 +19,28 @@ to obtain your developer key.
 ```python
 from royaleapi import Client
 
+# Create a client to acces the methods. Fill in your developer key.
+client = Client("DEV_KEY")
 
-client = Client("DEV_KEY")  # Your developer key.
 
-# Automatically converts to uppercase, removes hashtag and changes O to 0.
+# Method to obtain a single Plyaer object. Use Client.get_players((tag1, tag2)) for obtaining mutiple player objects.
+# Tags are automatically converted to uppercase, leading hashtag is removed and "O"s are replaced with "0"s.
 player = client.get_player("#2rqjooyyc")
 
-# Most keys are the same as those in json, except keys that are
-# camelCase (changed to snake_case), reserved Python keywords or confusing words.
+# Most key names are the same as those in received json, except keys that are
+# camelCase (converted to snake_case), reserved Python keywords or other confusing words.
 print(player.name, player.clan.donations_delta, player.stats.favorite_card.card_type)
 
 
-# Keys & exclude also work, use a iterable to give multiple arguments to them.
+# Method to obtain multiple Clan objects. Use Client.get_clan(tag) for obtaining a single Clan object.
+# Keys & exclude also work, use an iterable to give multiple arguments to them.
 newhkclan123, hkclansecond = client.get_clans(("C9C8PCP", "8LYRRV2"), exclude="members")
-# You can compare objects directly.
 
+# You can compare objects directly.
 print(newhkclan123.badge == hkclansecond.badge, newhkclan123.location == hkclansecond.location)
+
+# Clan members are also objects.
 for clan in newhkclan123, hkclansecond:
-    print(f"Player with highest trophies in {clan}: {clan.members[0].name} ({clan.members[0].trophies} trophies)")
+    print(f"Player with highest trophies in {clan.name}:\n"
+          f"{clan.members[0].name} ({clan.members[0].trophies} trophies)")
 ```
