@@ -74,7 +74,6 @@ class Client:
             exclude = (exclude,)
         # Check keys, exclude and kwargs
         for param in keys, exclude, kwargs:
-            print(param)
             if param is None:
                 continue
             elif is_iterable(param):
