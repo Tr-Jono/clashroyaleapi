@@ -1,10 +1,7 @@
 class CRError(Exception):
-    def __init__(self, message=None):
-        super(CRError, self).__init__()
-        if message:
-            self.message = message
-        else:
-            self.message = ""
+    def __init__(self, message=""):
+        super().__init__()
+        self.message = message
 
     def __str__(self):
         return str(self.message)
@@ -12,12 +9,12 @@ class CRError(Exception):
 
 class InvalidToken(CRError):
     def __init__(self):
-        super(InvalidToken, self).__init__("Invalid api token.")
+        super().__init__("Invalid api token.")
 
 
 class InvalidTag(CRError):
     def __init__(self):
-        super(InvalidTag, self).__init__("Invalid Clash Royale tag.")
+        super().__init__("Invalid Clash Royale tag.")
 
 
 class ServerResponseInvalid(CRError):

@@ -1,7 +1,6 @@
 .idea/
+pip
 
-# Python .gitignore
-# https://github.com/github/gitignore/blob/master/Python.gitignore
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -108,9 +107,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-
-# Jetbrains .gitignore
-# https://github.com/github/gitignore/blob/master/Global/JetBrains.gitignore
 
 # User-specific stuff
 .idea/**/workspace.xml

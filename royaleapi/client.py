@@ -1,48 +1,42 @@
 import json
 import requests
-import warnings
 
-from royaleapi.clan import Clan
-from royaleapi.player import Player
-from royaleapi.utils import validate_tag, is_iterable, is_non_empty_str
+from royaleapi.models import Clan
+from royaleapi.models import Player
+from royaleapi.utils import validate_tag, is_iterable
 from royaleapi.constants import API_BASE_URL
 from royaleapi.error import (InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized, NotFound,
                              ServerError, ServerUnderMaintenance, ServerOffline)
 
 
-class Client:
-    def __init__(self, api_token, custom_headers=None):
+class CRClient:
+    def __init__(self, api_token, headers=None):
         self.api_token = self._validate_token(api_token)
         self.session = requests.Session()
         self.headers = {"auth": api_token}
-        if custom_headers:
-            self.headers.update(custom_headers)
+        if headers:
+            self.headers.update(headers)
 
     @staticmethod
     def _validate_token(api_token):
-        """A very basic validation on given api token."""
         if any(x.isspace() for x in api_token):
             raise InvalidToken
         return api_token
 
     def _request(self, endpoint):
-        url = f"{API_BASE_URL}{endpoint}"
-        data = self.session.request('GET', url, headers=self.headers).content
-        return self._parse(data)
+        return self._parse(self.session.request("GET", f"{API_BASE_URL}{endpoint}", headers=self.headers).content)
 
     @staticmethod
     def _parse(json_data):
         try:
-            decoded_s = json_data.decode("utf-8")
-            data = json.loads(decoded_s)
+            data = json.loads(json_data.decode("utf-8"))
         except UnicodeDecodeError:
             raise ServerResponseInvalid("Server response could not be decoded using UTF-8.")
         except ValueError:
             raise ServerResponseInvalid("Invalid server response.")
         try:
             if data.get("error"):
-                status = data.get("status")
-                message = data.get("message")
+                status, message = data.get("status"), data.get("message", "")
                 if status == 400:
                     raise BadRequest(message)
                 elif status == 401:
@@ -60,83 +54,50 @@ class Client:
                 raise
         return data
 
-    def _get_methods_base(self, endpoint, keys=None, exclude=None, max_results=None, page=None, **kwargs):
-        # Check endpoint
-        if not is_non_empty_str(endpoint):
-            raise ValueError("'Endpoint' must be a non-empty string!")
-        # Check keys and exclude
-        if keys is not None and exclude is not None:
-            exclude = None
-            warnings.warn("Keys and exclude should not be used together. Exclude is changed to None.")
-        if not is_iterable(keys) and is_non_empty_str(keys):
-            keys = (keys,)
-        if not is_iterable(exclude) and is_non_empty_str(exclude):
-            exclude = (exclude,)
-        # Check keys, exclude and kwargs
-        for param in keys, exclude, kwargs:
-            if param is None:
-                continue
-            elif is_iterable(param):
-                if not all([is_non_empty_str(elem) for elem in param]):
-                    raise ValueError("Parameters 'keys' and 'exclude' and keyword arguments must be non-empty strings "
-                                     "or iterables of them.")
-            else:
-                raise ValueError("Parameters 'keys' and 'exclude' and keyword arguments must be non-empty strings "
-                                 "or iterables of them.")
-        # Check max_results and page
-        if max_results is None and page is not None:
-            raise ValueError("Parameter 'max' must be provided if parameter 'page' is given.")
-        for param in max_results, page:
-            if param is not None and type(param) != int and param < 0:
-                raise ValueError("Parameters 'max_results' and 'page' must be positive integers or None.")
-        # Check kwargs
-        if any([key for key in kwargs if key in ("keys", "exclude", "max", "page")]):
-            raise ValueError("Keyword arguments must not overwrite field filter and pagination arguments.")
-        # Real work begins
-        if any((keys, exclude, max_results, page, kwargs)):
+    def _get_methods_base(self, endpoint, max_results=None, page=None, **kwargs):
+        if max_results is not None and not isinstance(max_results, int) and max_results < 1:
+            raise ValueError("Parameter 'max_results' must be a positive integer if given.")
+        if page is not None and not isinstance(page, int) and page < 0:
+            raise ValueError("Parameters 'page' must be a non-negative integer if given.")
+        if not max_results and page:
+            raise ValueError("Parameter 'max_results' must be provided if parameter 'page' is given.")
+        if len([key for key in kwargs if key in ("max", "page")]):
+            raise ValueError("Keyword arguments must not overwrite pagination arguments.")
+        if any((max_results, page, kwargs)):
             endpoint += "?"
-            param_dict = {"keys": keys, "exclude": exclude, "max": max_results, "page": page, **kwargs}  # max is a kw
+            param_dict = {"max": max_results, "page": page, **kwargs}
             for key in param_dict:
                 if param_dict[key] is not None:
-                    if key in ("keys", "exclude"):
-                        endpoint += f"{key}={','.join(param_dict[key])}"
-                    else:
-                        endpoint += f"{key}={param_dict[key]}&"
-            if endpoint.endswith("&"):
-                endpoint = endpoint[:-1]  # remove the last "&"
+                    endpoint += f"{key}={param_dict[key]}&"
+            endpoint = endpoint[:-1]  # remove last "&"
         return self._request(endpoint)
 
     def get_version(self):
-        version = self.session.request("GET", f"{API_BASE_URL}version", headers=self.headers).text
-        return version
+        return self.session.request("GET", f"{API_BASE_URL}version", headers=self.headers).text
 
-    # def get_constants(self, keys=None, exclude=None, max_results=None, page=None):
-    #     return self._get_methods_base("constants", keys, exclude, max_results, page)
+    # def get_constants(self, max_results=None, page=None):
+    #     return self._get_methods_base("constants", max_results, page)
 
-    def get_player(self, player_tag, keys=None, exclude=None):
-        player_tag = validate_tag(player_tag)
-        return Player.de_json(self._get_methods_base(f"player/{player_tag}", keys, exclude))
+    def get_player(self, player_tag):
+        return Player.de_json(self._get_methods_base(f"player/{validate_tag(player_tag)}"))
 
-    def get_players(self, player_tags, keys=None, exclude=None, max_results=None, page=None):
+    def get_players(self, player_tags, max_results=None, page=None):
         if not is_iterable(player_tags):
             player_tags = (player_tags,)
         player_tags = [validate_tag(tag) for tag in player_tags]
-        return Player.de_list(self._get_methods_base(f"player/{','.join(player_tags)}",
-                                                     keys, exclude, max_results, page))
+        return Player.de_list(self._get_methods_base(f"player/{','.join(player_tags)}", max_results, page))
 
-    # def get_player_battles(self, player_tag, keys=None, exclude=None, max_results=None, page=None):
-    #     return self._get_methods_base(f"player/{player_tag}/battles", keys, exclude, max_results, page)
+    # def get_player_battles(self, player_tag, max_results=None, page=None):
+    #     return self._get_methods_base(f"player/{player_tag}/battles", max_results, page)
     #
-    # def get_players_battles(self, player_tags, keys=None, exclude=None, max_results=None, page=None):
-    #     return self._get_methods_base(f"player/{player_tags}/battles", keys, exclude, max_results, page)
+    # def get_players_battles(self, player_tags, max_results=None, page=None):
+    #     return self._get_methods_base(f"player/{player_tags}/battles", max_results, page)
 
-    def get_clan(self, clan_tag, keys=None, exclude=None):
-        clan_tag = validate_tag(clan_tag)
-        return Clan.de_json(self._get_methods_base(f"clan/{clan_tag}", keys, exclude))
+    def get_clan(self, clan_tag):
+        return Clan.de_json(self._get_methods_base(f"clan/{validate_tag(clan_tag)}"))
 
-    def get_clans(self, clan_tags, keys=None, exclude=None, max_results=None, page=None):
+    def get_clans(self, clan_tags):
         if not is_iterable(clan_tags):
             clan_tags = (clan_tags,)
         clan_tags = [validate_tag(tag) for tag in clan_tags]
-        return Clan.de_list(self._get_methods_base(f"clan/{','.join(clan_tags)}",
-                                                   keys, exclude, max_results, page))
+        return Clan.de_list(self._get_methods_base(f"clan/{','.join(clan_tags)}"))
