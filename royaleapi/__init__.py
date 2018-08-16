@@ -1,3 +1,3 @@
-from .client import CRClient
+from .client import RoyaleAPIClient
 
-__all__ = ["CRClient", "models"]
+__all__ = ["models", "RoyaleAPIClient", "constants", "error", "utils"]

@@ -14,7 +14,7 @@ class Clan(CRObject):
     name: str = field(compare=False)
     badge: ClanBadge = field(compare=False)
 
-    # Only for clans returned from "clan" endpoint
+    # Only returned from "clan" endpoint
     description: Optional[str] = field(default=None, compare=False)
     clan_type: Optional[str] = field(default=None, compare=False)
     score: Optional[int] = field(default=None, compare=False)
@@ -25,7 +25,7 @@ class Clan(CRObject):
     members: List[ClanMember] = field(default_factory=list, compare=False)
     tracking: Optional[ClanTracking] = field(default=None, compare=False)
 
-    # Only for clans returned from "player" endpoint
+    # Only present in Player objects
     role: Optional[str] = field(default=None, compare=False)
     player_donations: Optional[int] = field(default=None, compare=False)
     donations_received: Optional[int] = field(default=None, compare=False)

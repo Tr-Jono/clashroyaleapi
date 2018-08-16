@@ -1,20 +1,15 @@
 from abc import ABCMeta
 from dataclasses import dataclass, asdict
 
-from royaleapi.utils import camel_to_underscore
+from royaleapi.utils import camel_to_snake
 
 
-@dataclass(init=False)
-class CRObject:
-    __metaclass__ = ABCMeta
-
+@dataclass(init=False, repr=False, eq=False)
+class CRObject(metaclass=ABCMeta):
     def __eq__(self, other):
         if self.__class__ is other.__class__:
             raise ValueError("The two objects are not comparable!")
         return NotImplemented
-
-    def __str__(self):
-        return CRObject._pretty_format(self)
 
     def __getitem__(self, item):
         return self.__dict__[item]
@@ -28,12 +23,14 @@ class CRObject:
     @classmethod
     def de_json(cls, data):
         data = data.copy()
-        return {camel_to_underscore(x): data[x] for x in data}
+        return {camel_to_snake(x): data[x] for x in data}
 
     @classmethod
     def de_list(cls, data):
         if not data:
             return []
+        if isinstance(data, dict):
+            data = [data]
         return [cls.de_json(obj) for obj in data]
 
     @staticmethod

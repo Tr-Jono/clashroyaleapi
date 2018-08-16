@@ -15,7 +15,7 @@ class Card(CRObject):
     description: str = field(compare=False)
     card_id: int = field(compare=False)
 
-    # only returned from player objects
+    # only present in Player objects
     level: Optional[int] = field(default=None, compare=False)
     max_level: Optional[int] = field(default=None, compare=False)
     count: Optional[int] = field(default=None, compare=False)
@@ -27,7 +27,7 @@ class Card(CRObject):
     def de_json(cls, data):
         if not data:
             return None
-        data = super(Card, cls).de_json(data)
+        data = super().de_json(data)
         if "type" in data:
             data["card_type"] = data.pop("type")
         if "id" in data:
