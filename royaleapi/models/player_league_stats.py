@@ -8,8 +8,8 @@ from royaleapi.models.player_league_season import PlayerLeagueSeason
 @dataclass(eq=False)
 class PlayerLeagueStats(CRObject):
     current_season: PlayerLeagueSeason
-    previous_season: Optional[PlayerLeagueSeason]
-    best_season: Optional[PlayerLeagueSeason]
+    previous_season: Optional[PlayerLeagueSeason] = None
+    best_season: Optional[PlayerLeagueSeason] = None
 
     def __post_init__(self):
         self.current_season = PlayerLeagueSeason.de_json(self.current_season)

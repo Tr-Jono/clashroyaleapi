@@ -4,25 +4,26 @@ from itertools import chain
 import requests
 
 from royaleapi.constants import API_BASE_URL
-from royaleapi.error import (CRError, InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized, NotFound,
-                             ServerError, ServerUnderMaintenance, ServerOffline)
+from royaleapi.error import (CRError, InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized,
+                             NotFound, ServerError, ServerUnderMaintenance, ServerOffline)
 from royaleapi.models import Battle, ChestCycle, Clan, Player, ServerStatus
 from royaleapi.utils import tag_check, ExpiringDict
 
 
 class RoyaleAPIClient:
     def __init__(self, dev_key, use_cache=False, dynamic_cache_time=180, dynamic_cache_capacity=128,
-                 server_info_cache_time=300, constants_cache_time=86400, headers=None):
+                 server_info_cache_time=300, constants_cache_time=86400, headers=None, api_base_url=API_BASE_URL):
         self.dev_key = self._validate_token(dev_key)
-        self._session = requests.Session()
-        self._headers = {"auth": self.dev_key}
+        self.session = requests.Session()
         self._cache = None
+        self.headers = {"auth": self.dev_key}
+        self.api_base_url = api_base_url
         if use_cache:
             self._cache = {"dynamic": ExpiringDict(timeout=dynamic_cache_time, capacity=dynamic_cache_capacity),
                            "api_info": ExpiringDict(timeout=server_info_cache_time, capacity=3),
                            "constants": ExpiringDict(timeout=constants_cache_time, capacity=2)}
         if headers:
-            self._headers.update(headers)
+            self.headers.update(headers)
 
     def __repr__(self):
         return f"<{__name__}.{self.__class__.__name__} use_cache={bool(self._cache)}>"
@@ -34,7 +35,7 @@ class RoyaleAPIClient:
         self.close()
 
     def close(self):
-        self._session.close()
+        self.session.close()
 
     @staticmethod
     def _validate_token(api_token):
@@ -44,9 +45,9 @@ class RoyaleAPIClient:
 
     def _request(self, endpoint, params=None, return_text=False):
         if params:
-            response = self._session.get(f"{API_BASE_URL}{endpoint}", params=params, headers=self._headers)
+            response = self.session.get(f"{self.api_base_url}{endpoint}", params=params, headers=self.headers)
         else:
-            response = self._session.get(f"{API_BASE_URL}{endpoint}", headers=self._headers)
+            response = self.session.get(f"{self.api_base_url}{endpoint}", headers=self.headers)
         return self._parse(response, return_text)
 
     @staticmethod
@@ -82,15 +83,17 @@ class RoyaleAPIClient:
         return data
 
     def _get_methods_args_processor(self, endpoint, max_results=None, page=None, **kwargs):
+        endpoint = requests.utils.quote(endpoint, safe=":/")
         if max_results is not None and not isinstance(max_results, int) and max_results < 1:
             raise ValueError("Parameter 'max_results' must be a positive integer if given.")
         if page is not None and not isinstance(page, int) and page < 0:
             raise ValueError("Parameters 'page' must be a non-negative integer if given.")
-        if not max_results and page:
+        if page and not max_results:
             raise ValueError("Parameter 'max_results' must be provided if parameter 'page' is given.")
-        kwargs.update({"max": max_results, "page": None})
-        if len(kwargs) > 2 or any(kwargs.values()):
-            return self._request(requests.utils.quote(endpoint, safe=":/"), params=kwargs)
+        kwargs.update({"max": max_results, "page": page})
+        kwargs = {k: v for k, v in kwargs if v is not None}
+        if kwargs:
+            return self._request(endpoint, params=kwargs)
         return self._request(endpoint)
 
     def _purge_cache(self, cache_type="dynamic"):

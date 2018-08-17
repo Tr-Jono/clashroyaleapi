@@ -17,8 +17,8 @@ class CRObject(metaclass=ABCMeta):
     def to_dict(self, _pretty_format=False):
         return {**self.__dict__, "_": self.__class__.__name__} if _pretty_format else asdict(self)
 
-    def stringify(self):
-        return self._pretty_format(self, indent=0)
+    def stringify(self, omit_none=True):
+        return self._pretty_format(self, indent=0, omit_none=omit_none)
 
     @classmethod
     def de_json(cls, data):
@@ -34,8 +34,8 @@ class CRObject(metaclass=ABCMeta):
         return [cls.de_json(obj) for obj in data]
 
     @staticmethod
-    def _pretty_format(obj, indent=None):
-        """Referenced from Telethon (https://github.com/LonamiWebs/Telethon/blob/master/telethon/tl/tlobject.py)"""
+    def _pretty_format(obj, indent=None, omit_none=True):
+        """Referenced from Telethon's TLObject."""
         if indent is None:
             return repr(obj)
         else:
@@ -48,8 +48,9 @@ class CRObject(metaclass=ABCMeta):
                     result.append("\n")
                     indent += 1
                     for k, v in obj.items():
-                        if k != "_":
-                            result += ["\t" * indent, k, "=", CRObject._pretty_format(v, indent), ",\n"]
+                        if k == "_" or (omit_none and v is None):
+                            continue
+                        result += ["\t" * indent, k, "=", CRObject._pretty_format(v, indent), ",\n"]
                     result.pop()  # remove last ",\n"
                     indent -= 1
                     result += ["\n", "\t" * indent]

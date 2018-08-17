@@ -2,7 +2,7 @@
 
 Note: Clash Royale's official API will be added into the library in the next version.
 
-A Python 3.7 wrapper for [RoyaleAPI](https://royaleapi.com/),
+A __Python 3.6+__ wrapper for [RoyaleAPI](https://royaleapi.com/),
 based on [Jeff](https://github.com/jeffffc)'s [crpy](https://test.pypi.org/project/crpy/). (WIP)
 
 The wrapper's code style is inspired by
@@ -15,6 +15,10 @@ before using this wrapper.
 Documentation is to be written. For now, you may reference the
 [short examples](https://github.com/Tr-Jono/clashroyaleapi#short-examples-of-using-the-wrapper) below.
 
+__This content is not affiliated with, endorsed, sponsored,
+or specifically approved by Supercell and Supercell is not responsible for it.
+For more information see [Supercell’s Fan Content Policy](http://supercell.com/en/fan-content-policy/).__
+
 ## Installation
 The project is on [PyPI](https://pypi.org/project/clashroyaleapi/).
 ```
@@ -26,13 +30,24 @@ Follow [these instructions](https://docs.royaleapi.com/#/authentication?id=gener
 to obtain your developer key.
 
 ## Currently Supported Methods
-Tuples, dicts, sets and generators can be used instead of lists.
-```
+```python
 client.get_player(player_tag)  # alias: client.get_players()
 client.get_player_battles(player_tag)  # alias: client.get_players_battles()
 client.get_player_chests(player_tag)  # alias: client.get_players_chests()
 client.get_clan(clan_tag)  # alias: client.get_clans()
 client.get_version()
+client.get_health()
+client.get_status()
+client.get_endpoints()
+```
+Note: Lists, tuples, dicts, sets and generators can be used when passing arguments.
+All of the following method calls are valid and return the same result.
+```python
+client,get_players(tag1, tag2, tag3)
+client.get_players([tag1, tag2, tag3])
+client.get_players((tag1, tag2, tag3))
+client.get_players({tag1, tag2, tag3})
+client.get_players({tag1: None, tag2: None, tag3: None})
 ```
 
 ## Short examples of using the wrapper
@@ -44,13 +59,13 @@ import royaleapi
 with royaleapi.RoyaleAPIClient("YOUR_DEVELOPER_KEY") as client:
     p = client.get_player("2RQJ0OYYC")
     print(p.name, p.stats.favorite_card.name, p.deck[0].name, sep=", ")
-    c1, c2 = client.get_clans(("c9c8pcp", "#8LYRRV2"))
-    print(c1.badge == c2.badge, c1.location == c2.location)
+    c1, c2 = client.get_clans("c9c8pcp", "#8LYRRV2")
+    print(c1.badge == c2.badge, c1.location == c2.location, sep=", ")
     print([(c.name, c.members[0].name, c.members[0].trophies) for c in (c1, c2)])
 
 # (My) Results:
 # Trainer Jono, Golem, The Log
-# False True
+# False, True
 # [('新香港部落123', '花果山劉德華', 5073), ('香港部落·二部', 'Gnuelnam', 4479)]
 ```
 ### Example 2: Using cached data
@@ -67,12 +82,12 @@ p2 = client.get_player(player_tag)
 t3 = time.time()
 p3 = client.get_player(player_tag, use_cache=False)
 t4 = time.time()
-print(t2 - t1, t3 - t2, t4 - t3, p1 == p2 == p3)
+print(t2 - t1, t3 - t2, t4 - t3, p1 == p2 == p3, sep=", ")
 
 # (My) Results
-# 2.3867766857147217 0.28074216842651367 1.4506447315216064 True
+# 2.3867766857147217, 0.28074216842651367, 1.4506447315216064, True
 
 # The first call takes the longest time since the data is not cached locally or on RoyaleAPI's server.
 # The second call takes the shortest time since the data is cached locally.
-# The third call takes less time than the first call since that data is cached on RoyaleAPI's server.
+# The third call takes less time than the first call since the data is cached on RoyaleAPI's server.
 ```

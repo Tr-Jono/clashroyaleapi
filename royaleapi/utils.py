@@ -15,8 +15,8 @@ def camel_to_snake(string):
 
 
 def to_camel_case(string):
-    components = string.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
+    c = string.split('_')
+    return c[0] + ''.join(x.title() for x in c[1:])
 
 
 def is_iterable(obj):

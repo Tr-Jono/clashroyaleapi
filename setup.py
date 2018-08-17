@@ -16,6 +16,7 @@ setup(
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Topic :: Games/Entertainment"
     ],
     keywords="clash royale cr crapi royaleapi",
@@ -25,6 +26,7 @@ setup(
     license="GNU General Public License v3.0",
     packages=find_packages(),
     install_requires=[
+        "dataclasses",
         "requests"
     ],
     include_package_data=True,
