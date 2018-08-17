@@ -3,7 +3,6 @@ from itertools import chain
 
 import requests
 
-from royaleapi.constants import API_BASE_URL
 from royaleapi.error import (CRError, InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized,
                              NotFound, ServerError, ServerUnderMaintenance, ServerOffline)
 from royaleapi.models import Battle, ChestCycle, Clan, Player, ServerStatus
@@ -12,7 +11,8 @@ from royaleapi.utils import tag_check, ExpiringDict
 
 class RoyaleAPIClient:
     def __init__(self, dev_key, use_cache=False, dynamic_cache_time=180, dynamic_cache_capacity=128,
-                 server_info_cache_time=300, constants_cache_time=86400, headers=None, api_base_url=API_BASE_URL):
+                 server_info_cache_time=300, constants_cache_time=86400, headers=None,
+                 api_base_url="https://api.royaleapi.com/"):
         self.dev_key = self._validate_token(dev_key)
         self.session = requests.Session()
         self._cache = None
@@ -91,7 +91,7 @@ class RoyaleAPIClient:
         if page and not max_results:
             raise ValueError("Parameter 'max_results' must be provided if parameter 'page' is given.")
         kwargs.update({"max": max_results, "page": page})
-        kwargs = {k: v for k, v in kwargs if v is not None}
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
         if kwargs:
             return self._request(endpoint, params=kwargs)
         return self._request(endpoint)

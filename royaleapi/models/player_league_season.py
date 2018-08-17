@@ -9,10 +9,10 @@ class PlayerLeagueSeason(CRObject):
     trophies: int
     rank: Optional[int] = None
 
-    # Only given in current_season and previous_season
+    # Can only be given in current_season and previous_season
     best_trophies: Optional[int] = None
 
-    # Only given in previous_season and best_season
+    # Can only be given in previous_season and best_season
     season_id: Optional[str] = None
 
     @classmethod
