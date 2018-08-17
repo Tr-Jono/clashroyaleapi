@@ -5,6 +5,7 @@ with open("README.md", encoding="utf-8") as f:
 
 setup(
     name="clashroyaleapi",
+    python_requies=">=3.6",
     version="0.1.1",
     description="A Python wrapper for RoyaleAPI.",
     long_description=long_description,
@@ -26,7 +27,7 @@ setup(
     license="GNU General Public License v3.0",
     packages=find_packages(),
     install_requires=[
-        "dataclasses",
+        "dataclasses; python_version<'3.7'",
         "requests"
     ],
     include_package_data=True,
