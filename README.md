@@ -42,7 +42,7 @@ client.get_health()
 client.get_status()
 client.get_endpoints()
 ```
-Note: Lists, tuples, dicts, sets and generators can be used when passing arguments.
+Lists, tuples, dicts, sets and generators can be used when passing arguments.
 All of the following method calls are valid and return the same result.
 ```python
 client.get_players(tag1, tag2, tag3)
@@ -54,7 +54,7 @@ client.get_players((tag for tag in (tag1, tag2, tag3)))   # If you want to do th
 ```
 
 ## Short examples of using the wrapper
-Note: Player/Clan/Tournament tags will be "corrected" and validated before requesting the API.
+Player/Clan/Tournament tags will be "corrected" and validated before requesting the API.
 ### Example 1: `with` statement
 ```python
 import royaleapi
