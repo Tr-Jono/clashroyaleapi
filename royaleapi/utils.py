@@ -46,8 +46,9 @@ def tag_check(tags, args):
 
 
 class ExpiringDict(OrderedDict):
+    # Users should purge the dict themselves if they access client cache or use this dict for other purposes
     def __init__(self, *args, timeout=300, capacity=None, **kwargs):
-        assert timeout >= 1 and (isinstance(capacity, int) or capacity is None)
+        assert timeout > 0 and (isinstance(capacity, int) or capacity is None)
         super().__init__(*args, **kwargs)
         self.timeout = timeout
         self.capacity = capacity

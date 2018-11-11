@@ -10,8 +10,8 @@ class ClanTracking(CRObject):
     snapshot_count: int
 
     @classmethod
-    def de_json(cls, data):
+    def de_json(cls, data, client):
         if not data:
             return None
-        data = super().de_json(data)
+        data = super().de_json(data, client)
         return cls(**data)

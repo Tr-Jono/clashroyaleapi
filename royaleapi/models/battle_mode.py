@@ -15,10 +15,10 @@ class BattleMode(CRObject):
     same_deck: Optional[bool] = field(default=None, compare=False)
 
     @classmethod
-    def de_json(cls, data):
+    def de_json(cls, data, client):
         if not data:
             return None
         if "id" in data:
             data["mode_id"] = data.pop("id")
-        data = super().de_json(data)
+        data = super().de_json(data, client)
         return cls(**data)

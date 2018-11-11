@@ -21,10 +21,10 @@ class PlayerGames(CRObject):
         self.draws_percent = round(100 * (self.draws / self.total), 2)
 
     @classmethod
-    def de_json(cls, data):
+    def de_json(cls, data, client):
         if not data:
             return None
-        data = super().de_json(data)
+        data = super().de_json(data, client)
         for key in "wins_percent", "losses_percent", "draws_percent":
             if key in data:
                 del data[key]

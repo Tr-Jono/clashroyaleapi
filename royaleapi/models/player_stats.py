@@ -1,10 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
 from royaleapi.models.card import Card
 
+if TYPE_CHECKING:
+    from royaleapi.client import RoyaleAPIClient
 
-@dataclass
+
+@dataclass(eq=False)
 class PlayerStats(CRObject):
     clan_cards_collected: int
     tournament_cards_won: int
@@ -16,13 +20,14 @@ class PlayerStats(CRObject):
     challenge_max_wins: int
     challenge_cards_won: int
     level: int
+    client: Optional["RoyaleAPIClient"] = field(default=None, compare=False)
 
     def __post_init__(self):
-        self.favorite_card = Card.de_json(self.favorite_card)
+        self.favorite_card = Card.de_json(self.favorite_card, self.client)
 
     @classmethod
-    def de_json(cls, data):
+    def de_json(cls, data, client):
         if not data:
             return None
-        data = super().de_json(data)
-        return cls(**data)
+        data = super().de_json(data, client)
+        return cls(client=client, **data)

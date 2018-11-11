@@ -15,27 +15,41 @@ class CRObject(metaclass=ABCMeta):
         return self.__dict__[item]
 
     def to_dict(self, _pretty_format=False):
-        return {**self.__dict__, "_": self.__class__.__name__} if _pretty_format else asdict(self)
+        if _pretty_format:
+            return {**self.__dict__, "_": self.__class__.__name__}
+        else:
+            data = {}
+            for key in self.__dict__:
+                if key == "client":
+                    continue
+                val = self.__dict__[key]
+                if val not in (None, []):
+                    if isinstance(val, CRObject):
+                        data[key] = val.to_dict()
+                    elif isinstance(val, list):
+                        data[key] = [i.to_dict() for i in val]
+                    else:
+                        data[key] = val
+            return data
 
     def stringify(self, omit_none_values=True):
         return self._pretty_format(self, omit_none_values=omit_none_values)
 
     @classmethod
-    def de_json(cls, data):
+    def de_json(cls, data, client):
         data = data.copy()
         return {camel_to_snake(x): data[x] for x in data}
 
     @classmethod
-    def de_list(cls, data):
+    def de_list(cls, data, client):
         if not data:
             return []
         if isinstance(data, dict):
             data = [data]
-        return [cls.de_json(obj) for obj in data]
+        return [cls.de_json(obj, client) for obj in data]
 
     @staticmethod
     def _pretty_format(obj, indent=0, omit_none_values=True):
-        """Referenced from Telethon's TLObject."""
         result = []
         if isinstance(obj, CRObject):
             obj = obj.to_dict(_pretty_format=True)
@@ -45,16 +59,14 @@ class CRObject(metaclass=ABCMeta):
                 result.append("\n")
                 indent += 1
                 for k, v in obj.items():
-                    if k == "_" or (omit_none_values and v in [None, []]):
+                    if k in ("_", "client") or (omit_none_values and v in [None, []]):
                         continue
                     result += ["\t" * indent, k, "=", CRObject._pretty_format(v, indent), ",\n"]
                 result.pop()  # remove last ",\n"
                 indent -= 1
                 result += ["\n", "\t" * indent]
             result.append(")")
-        elif isinstance(obj, (str, bytes)):
-            result.append(repr(obj))
-        elif hasattr(obj, "__iter__"):
+        elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes)):
             result.append("[\n")
             indent += 1
             for x in obj:

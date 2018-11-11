@@ -11,8 +11,8 @@ class Arena(CRObject):
     trophy_limit: int = field(default=None, compare=False)
 
     @classmethod
-    def de_json(cls, data):
+    def de_json(cls, data, client):
         if not data or data["name"] == "unknown":
             return None
-        data = super(Arena, cls).de_json(data)
+        data = super(Arena, cls).de_json(data, client)
         return cls(**data)

@@ -1,18 +1,18 @@
 # clashroyaleapi v0.1.1
 
-Note: Clash Royale's official API will be added into the library in the next version.
-
-A __Python 3.6+__ wrapper for [RoyaleAPI](https://royaleapi.com/),
-based on [Jeff](https://github.com/jeffffc)'s [crpy](https://test.pypi.org/project/crpy/). (WIP)
+A sync __Python 3.6+__ wrapper for [RoyaleAPI](https://royaleapi.com/). (WIP)
 
 The wrapper's code style is inspired by
-[python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) and
-[Telethon](https://github.com/LonamiWebs/Telethon) and attempts to improve the existing Python wrappers for RoyaleAPI.
+[python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot),
+[Telethon](https://github.com/LonamiWebs/Telethon)
+and [Jeff](https://github.com/jeffffc)'s [crpy](https://test.pypi.org/project/crpy/)
+and attempts to provide an alternative which uses dataclasses to the
+[existing Python wrappers for RoyaleAPI](https://docs.royaleapi.com/#/wrappers?id=python).
 
 You are recommended to read [RoyaleAPI's documentation](https://docs.royaleapi.com)
 before using this wrapper.
 
-Documentation is to be written. For now, you may reference the
+Documentation for this wrapper is to be written. For now, you may reference the
 [short examples](https://github.com/Tr-Jono/clashroyaleapi#short-examples-of-using-the-wrapper) below.
 
 __This content is not affiliated with, endorsed, sponsored,
@@ -24,6 +24,8 @@ The project is on [PyPI](https://pypi.org/project/clashroyaleapi/).
 ```
 pip install clashroyaleapi
 ```
+This wrapper requires [requests](http://docs.python-requests.org/en/master/) and
+the [dataclasses backport](https://github.com/ericvsmith/dataclasses) (Python 3.6 only).
 
 ## Obtaining Developer Key
 Follow [these instructions](https://docs.royaleapi.com/#/authentication?id=generating-new-keys)
@@ -43,11 +45,12 @@ client.get_endpoints()
 Note: Lists, tuples, dicts, sets and generators can be used when passing arguments.
 All of the following method calls are valid and return the same result.
 ```python
-client,get_players(tag1, tag2, tag3)
+client.get_players(tag1, tag2, tag3)
 client.get_players([tag1, tag2, tag3])
 client.get_players((tag1, tag2, tag3))
 client.get_players({tag1, tag2, tag3})
 client.get_players({tag1: None, tag2: None, tag3: None})
+client.get_players((tag for tag in (tag1, tag2, tag3)))   # If you want to do this somehow
 ```
 
 ## Short examples of using the wrapper

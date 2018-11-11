@@ -1,27 +1,22 @@
-class CRError(Exception):
-    def __init__(self, message=""):
-        super().__init__()
-        self.message = message
-
-    def __str__(self):
-        return str(self.message)
-
-
-class InvalidToken(CRError):
-    def __init__(self):
-        super().__init__("Invalid api token.")
-
-
-class InvalidTag(CRError):
-    def __init__(self):
-        super().__init__("Invalid Clash Royale tag.")
-
-
-class ServerResponseInvalid(CRError):
+class RoyaleAPIError(Exception):
     pass
 
 
-class RequestError(CRError):
+class InvalidToken(RoyaleAPIError):
+    def __init__(self):
+        super().__init__("Invalid api token")
+
+
+class InvalidTag(RoyaleAPIError):
+    def __init__(self):
+        super().__init__("Invalid Clash Royale tag")
+
+
+class ServerResponseInvalid(RoyaleAPIError):
+    pass
+
+
+class RequestError(RoyaleAPIError):
     pass
 
 
@@ -37,11 +32,15 @@ class NotFound(RequestError):
     pass
 
 
-class ServiceUnavailable(CRError):
+class TooManyRequests(RequestError):
     pass
 
 
-class ServerError(ServiceUnavailable):
+class ServiceUnavailable(RoyaleAPIError):
+    pass
+
+
+class InternalServerError(ServiceUnavailable):
     pass
 
 
