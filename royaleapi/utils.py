@@ -24,7 +24,7 @@ def is_iterable(obj):
 
 
 def validate_tag(tag):
-    tag = tag.strip("#").upper().replace("O", "0")
+    tag = tag.lstrip("#").upper().replace("O", "0")
     if not isinstance(tag, str) or tag == "" or len(tag) < 3 or any([c for c in tag if c not in VALID_TAG_CHARS]):
         raise InvalidTag
     return tag

@@ -13,6 +13,7 @@ from royaleapi.models.player_stats import PlayerStats
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
 
+
 @dataclass
 class Player(CRObject):
     tag: str

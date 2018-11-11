@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 from royaleapi.utils import camel_to_snake
 
@@ -19,21 +19,18 @@ class CRObject(metaclass=ABCMeta):
             return {**self.__dict__, "_": self.__class__.__name__}
         else:
             data = {}
-            for key in self.__dict__:
-                if key == "client":
-                    continue
-                val = self.__dict__[key]
-                if val not in (None, []):
-                    if isinstance(val, CRObject):
-                        data[key] = val.to_dict()
-                    elif isinstance(val, list):
-                        data[key] = [i.to_dict() for i in val]
+            for k, v in self.__dict__.items():
+                if v not in (None, []):
+                    if isinstance(v, CRObject):
+                        data[k] = v.to_dict()
+                    elif isinstance(v, list):
+                        data[k] = [i.to_dict() for i in v]
                     else:
-                        data[key] = val
+                        data[k] = v
             return data
 
     def stringify(self, omit_none_values=True):
-        return self._pretty_format(self, omit_none_values=omit_none_values)
+        return self._pretty_format(self)
 
     @classmethod
     def de_json(cls, data, client):
@@ -49,7 +46,7 @@ class CRObject(metaclass=ABCMeta):
         return [cls.de_json(obj, client) for obj in data]
 
     @staticmethod
-    def _pretty_format(obj, indent=0, omit_none_values=True):
+    def _pretty_format(obj, indent=0):
         result = []
         if isinstance(obj, CRObject):
             obj = obj.to_dict(_pretty_format=True)
@@ -59,10 +56,10 @@ class CRObject(metaclass=ABCMeta):
                 result.append("\n")
                 indent += 1
                 for k, v in obj.items():
-                    if k in ("_", "client") or (omit_none_values and v in [None, []]):
+                    if k in ("_", "client") or v in (None, []):
                         continue
                     result += ["\t" * indent, k, "=", CRObject._pretty_format(v, indent), ",\n"]
-                result.pop()  # remove last ",\n"
+                del result[-1]  # remove last ",\n"
                 indent -= 1
                 result += ["\n", "\t" * indent]
             result.append(")")
