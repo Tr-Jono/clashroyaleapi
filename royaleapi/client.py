@@ -198,7 +198,7 @@ class RoyaleAPIClient:
         return ServerStatus.de_json(self._get_methods_base("status", "s", use_cache), self)
 
     def get_endpoints(self, use_cache: bool = True) -> List[str]:
-        return self._get_methods_base("endpoints", "e", use_cache, cache_type="constants", return_text=True)
+        return self._get_methods_base("endpoints", "e", use_cache, cache_type="constants")
 
     get_players = get_player
     get_players_battles = get_player_battles
