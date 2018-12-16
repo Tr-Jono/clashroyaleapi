@@ -1,6 +1,10 @@
 from dataclasses import dataclass, field
+from typing import Dict, Optional, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
+
+if TYPE_CHECKING:
+    from royaleapi.client import RoyaleAPIClient
 
 
 @dataclass(eq=False)
@@ -15,13 +19,13 @@ class PlayerGames(CRObject):
     draws: int
     draws_percent: float = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.wins_percent = round(100 * (self.wins / self.total), 2)
         self.losses_percent = round(100 * (self.losses / self.total), 2)
         self.draws_percent = round(100 * (self.draws / self.total), 2)
 
     @classmethod
-    def de_json(cls, data, client):
+    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["PlayerGames"]:
         if not data:
             return None
         data = super().de_json(data, client)

@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, TYPE_CHECKING
+from datetime import datetime, timezone
+from typing import List, Dict, Optional, TYPE_CHECKING
 
 from royaleapi.models.arena import Arena
 from royaleapi.models.base import CRObject
@@ -26,22 +27,29 @@ class Battle(CRObject):
     opponent: List[Player]
     arena: Arena = field(compare=False)
     tournament_tag: Optional[int] = field(default=None, compare=False)
-    client: Optional["RoyaleAPIClient"] = field(default=None, compare=False)
+    client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.mode = BattleMode.de_json(self.mode, self.client)
         self.team = Player.de_list(self.team, self.client)
         self.opponent = Player.de_list(self.opponent, self.client)
         self.arena = Arena.de_json(self.arena, self.client)
 
-    def get_team(self, use_cache=True):
+    def datetime(self) -> datetime:
+        return datetime.utcfromtimestamp(self.utc_time).replace(tzinfo=timezone.utc)
+
+    def get_team(self, use_cache: bool = True) -> List[Player]:
         return self.client.get_players([p.tag for p in self.team], use_cache=use_cache)
 
-    def get_opponents(self, use_cache=True):
+    def get_opponents(self, use_cache: bool = True) -> List[Player]:
         return self.client.get_players([p.tag for p in self.opponent], use_cache=use_cache)
 
+    def get_players(self, use_cache: bool = True) -> List[List[Player]]:
+        players = self.client.get_players([p.tag for p in self.team + self.opponent], use_cache=use_cache)
+        return [[players[0]], [players[1]]] if self.team_size == 1 else [[players[:2]], [players[2:]]]
+
     @classmethod
-    def de_json(cls, data, client):
+    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Battle"]:
         if not data:
             return None
         data = super().de_json(data, client)

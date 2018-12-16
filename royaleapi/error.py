@@ -3,12 +3,12 @@ class RoyaleAPIError(Exception):
 
 
 class InvalidToken(RoyaleAPIError):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Invalid api token")
 
 
 class InvalidTag(RoyaleAPIError):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Invalid Clash Royale tag")
 
 

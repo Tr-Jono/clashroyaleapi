@@ -1,4 +1,4 @@
-VALID_TAG_CHARS = [c for c in "0289CGJLPQRUVY"]
+VALID_TAG_CHARS = "0289CGJLPQRUVY"
 
 
 class ClanBattleType:

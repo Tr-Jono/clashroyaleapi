@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Dict, Optional, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
 from royaleapi.models.clan_badge import ClanBadge
 from royaleapi.models.clan_member import ClanMember
-from royaleapi.models.location import Location
 from royaleapi.models.clan_tracking import ClanTracking
+from royaleapi.models.location import Location
 
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
@@ -16,7 +16,6 @@ class Clan(CRObject):
     tag: str
     name: str = field(compare=False)
     badge: ClanBadge = field(compare=False)
-    client: Optional["RoyaleAPIClient"] = field(default=None, compare=False)
 
     # Only returned from "clan" endpoint
     description: Optional[str] = field(default=None, compare=False)
@@ -35,17 +34,19 @@ class Clan(CRObject):
     donations_received: Optional[int] = field(default=None, compare=False)
     donations_delta: Optional[int] = field(default=None, compare=False)
 
-    def __post_init__(self):
+    client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
         self.badge = ClanBadge.de_json(self.badge, self.client)
         self.location = Location.de_json(self.location, self.client)
         self.members = ClanMember.de_list(self.members, self.client)
         self.tracking = ClanTracking.de_json(self.tracking, self.client)
 
-    def get_full_clan(self, use_cache=True):
+    def get_full_clan(self, use_cache: bool = True) -> "Clan":
         return self.client.get_clan(self.tag, use_cache=use_cache)
 
     @classmethod
-    def de_json(cls, data, client):
+    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Clan"]:
         if not data:
             return None
         data = super().de_json(data, client)

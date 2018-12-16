@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Dict, Optional, TYPE_CHECKING
 
 from royaleapi.models.achievement import Achievement
 from royaleapi.models.arena import Arena
 from royaleapi.models.base import CRObject
 from royaleapi.models.card import Card
+from royaleapi.models.chest_cycle import ChestCycle
 from royaleapi.models.clan import Clan
 from royaleapi.models.player_games import PlayerGames
 from royaleapi.models.player_league_stats import PlayerLeagueStats
@@ -12,6 +13,7 @@ from royaleapi.models.player_stats import PlayerStats
 
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
+    from royaleapi.models.battle import Battle
 
 
 @dataclass
@@ -37,9 +39,9 @@ class Player(CRObject):
     start_trophies: int = field(default=None, compare=False)
     trophy_change: int = field(default=None, compare=False)
 
-    client: Optional["RoyaleAPIClient"] = field(default=None, compare=False)
+    client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.deck = Card.de_list(self.deck, self.client)
         self.arena = Arena.de_json(self.arena, self.client)
         self.clan = Clan.de_json(self.clan, self.client)
@@ -49,20 +51,20 @@ class Player(CRObject):
         self.cards = Card.de_list(self.cards, self.client)
         self.achievements = Achievement.de_list(self.achievements, self.client)
 
-    def get_full_player(self, use_cache=True):
+    def get_full_player(self, use_cache: bool = True) -> "Player":
         return self.client.get_player(self.tag, use_cache=use_cache)
 
-    def get_chests(self, use_cache=True):
+    def get_chests(self, use_cache: bool = True) -> ChestCycle:
         return self.client.get_player_chests(self.tag, use_cache=use_cache)
 
-    def get_battles(self, use_cache=True):
+    def get_battles(self, use_cache: bool = True) -> List["Battle"]:
         return self.client.get_player_battles(self.tag, use_cache=use_cache)
 
-    def get_clan(self, use_cache=True):
+    def get_clan(self, use_cache: bool = True) -> Optional[Clan]:
         return self.client.get_clan(self.clan.tag, use_cache=use_cache) if self.clan else None
 
     @classmethod
-    def de_json(cls, data, client):
+    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Player"]:
         if not data:
             return None
         data = super().de_json(data, client)

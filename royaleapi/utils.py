@@ -1,7 +1,7 @@
 import re
 import time
 from collections import OrderedDict
-from types import GeneratorType
+from typing import List, Tuple, Generator, Iterable, Any, Optional
 
 from royaleapi.constants import VALID_TAG_CHARS
 from royaleapi.error import InvalidTag
@@ -10,27 +10,22 @@ FIRST_CAP_REGEX = re.compile('(.)([A-Z][a-z]+)')
 ALL_CAP_REGEX = re.compile('([a-z0-9])([A-Z])')
 
 
-def camel_to_snake(string):
+def camel_to_snake(string) -> str:
     return ALL_CAP_REGEX.sub(r'\1_\2', FIRST_CAP_REGEX.sub(r'\1_\2', string)).lower()
 
 
-def to_camel_case(string):
-    c = string.split('_')
-    return c[0] + ''.join(x.title() for x in c[1:])
+def is_iterable(obj: Any) -> bool:
+    return isinstance(obj, (list, tuple, dict, set, Generator))
 
 
-def is_iterable(obj):
-    return isinstance(obj, (list, tuple, dict, set, GeneratorType))
-
-
-def validate_tag(tag):
+def validate_tag(tag: str) -> str:
     tag = tag.lstrip("#").upper().replace("O", "0")
     if not isinstance(tag, str) or tag == "" or len(tag) < 3 or any([c for c in tag if c not in VALID_TAG_CHARS]):
         raise InvalidTag
     return tag
 
 
-def tag_check(tags, args):
+def tag_check(tags: str or List[str], args: Tuple[str, ...]) -> Tuple[List[str], bool]:
     given_single_tag = False
     if isinstance(tags, str):
         if args:
@@ -47,31 +42,32 @@ def tag_check(tags, args):
 
 class ExpiringDict(OrderedDict):
     # Users should purge the dict themselves if they access client cache or use this dict for other purposes
-    def __init__(self, *args, timeout=300, capacity=None, **kwargs):
+    def __init__(self, *args: Iterable[Iterable[Any]], timeout: int = 300, capacity: Optional[int] = None,
+                 **kwargs: Any) -> None:
         assert timeout > 0 and (isinstance(capacity, int) or capacity is None)
         super().__init__(*args, **kwargs)
         self.timeout = timeout
         self.capacity = capacity
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> Any:
         return super().__getitem__(key)[0]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Any, value: Any) -> None:
         super().__setitem__(key, (value, time.time()))
 
-    def get(self, key, default=None):
+    def get(self, key: Any, default: Optional[Any] = None) -> Any:
         try:
             return self[key]
         except KeyError:
             return default
 
-    def items(self):
+    def items(self) -> Generator[Tuple[Any, Any], None, None]:
         return ((k, v) for k, (v, _) in super().items())
 
-    def values(self):
+    def values(self) -> Generator[Any, None, None]:
         return (v for v, _ in super().values())
 
-    def purge(self):
+    def purge(self) -> None:
         if self.capacity:
             overflowing = max(0, len(self) - self.capacity)
             for _ in range(overflowing):

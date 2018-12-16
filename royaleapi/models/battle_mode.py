@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Dict, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
+
+if TYPE_CHECKING:
+    from royaleapi.client import RoyaleAPIClient
 
 
 @dataclass
@@ -15,7 +18,7 @@ class BattleMode(CRObject):
     same_deck: Optional[bool] = field(default=None, compare=False)
 
     @classmethod
-    def de_json(cls, data, client):
+    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["BattleMode"]:
         if not data:
             return None
         if "id" in data:

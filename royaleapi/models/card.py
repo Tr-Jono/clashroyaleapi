@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Dict, Optional, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
+
+if TYPE_CHECKING:
+    from royaleapi.client import RoyaleAPIClient
 
 
 @dataclass
@@ -17,6 +20,7 @@ class Card(CRObject):
 
     # only present in Player objects
     level: Optional[int] = field(default=None, compare=False)
+    star_level: Optional[int] = field(default=None, compare=False)  # Not given if star_level is 0
     max_level: Optional[int] = field(default=None, compare=False)
     count: Optional[int] = field(default=None, compare=False)
     required_for_upgrade: Optional[int or str] = field(default=None, compare=False)  # str can only be "Maxed"
@@ -24,7 +28,7 @@ class Card(CRObject):
     icon: Optional[str] = field(default=None, compare=False)
 
     @classmethod
-    def de_json(cls, data, client):
+    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Card"]:
         if not data:
             return None
         data = super().de_json(data, client)
