@@ -7,7 +7,7 @@ import requests
 from royaleapi.constants import ClanBattleType
 from royaleapi.error import (RoyaleAPIError, InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized, NotFound,
                              TooManyRequests, InternalServerError, ServerUnderMaintenance, ServerOffline)
-from royaleapi.models import Battle, ChestCycle, Clan, ClanWar, Player, ServerStatus
+from royaleapi.models import Battle, ChestCycle, Clan, ClanTracking, ClanWar, Player, ServerStatus
 from royaleapi.utils import is_iterable, validate_tag, ExpiringDict
 
 
@@ -210,6 +210,13 @@ class RoyaleAPIClient:
         data = self._get_methods_with_tags_base("clan/{}/war", tags, keys, use_cache)
         return ClanWar.de_json(data, self) if given_single_tag else ClanWar.de_list(data, self)
 
+    def get_clan_tracking(self, clan_tags: str or List[str], *args: str,
+                          use_cache: bool = True) -> ClanTracking or List[ClanTracking]:
+        tags, given_single_tag = self._tag_check(clan_tags, args)
+        keys = [f"ct{tag}" for tag in tags]
+        data = self._get_methods_with_tags_base("clan/{}/tracking", tags, keys, use_cache)
+        return ClanTracking.de_json(data, self) if given_single_tag else ClanTracking.de_list(data, self)
+
     def search_clan(self, name: Optional[str] = None, min_score: Optional[int] = None,
                     min_members: Optional[int] = None, max_members: Optional[int] = None,
                     location_id: Optional[int] = None, max_results: Optional[int] = None,
@@ -254,4 +261,5 @@ class RoyaleAPIClient:
     get_clans = get_clan
     get_clans_battles = get_clan_battles
     get_clans_war = get_clan_war
+    get_clans_tracking = get_clan_tracking
     search_clans = search_clan

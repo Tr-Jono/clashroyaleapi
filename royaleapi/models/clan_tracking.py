@@ -13,6 +13,12 @@ class ClanTracking(CRObject):
     available: bool
     snapshot_count: int
 
+    # If clan is tracked
+    legible: Optional[bool] = None
+
+    # Only returned in "tracking" endpoint
+    tag: Optional[str] = None
+
     @classmethod
     def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["ClanTracking"]:
         if not data:
