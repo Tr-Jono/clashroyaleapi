@@ -18,3 +18,10 @@ class ClanBattleType:
     ALL = "all"
     WAR = "war"
     CLANMATE = "clanMate"
+
+
+class ClanWarState:
+    NOT_IN_WAR = "notInWar"
+    COLLECTION_DAY = "collectionDay"
+    MATCHMAKING = "matchmaking"
+    WAR_DAY = "warDay"

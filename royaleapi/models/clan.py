@@ -35,6 +35,13 @@ class Clan(CRObject):
     donations_received: Optional[int] = field(default=None, compare=False)
     donations_delta: Optional[int] = field(default=None, compare=False)
 
+    # Only returned from "clan/:tag/war" endpoint
+    participants: Optional[int] = field(default=None, compare=False)
+    battles_played: Optional[int] = field(default=None, compare=False)
+    wins: Optional[int] = field(default=None, compare=False)
+    crowns: Optional[int] = field(default=None, compare=False)
+    war_trophies: Optional[int] = field(default=None, compare=False)
+
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:

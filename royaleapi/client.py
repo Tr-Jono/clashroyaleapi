@@ -1,14 +1,14 @@
 import json
 from types import TracebackType
-from typing import List, Dict, Optional, Type
+from typing import List, Tuple, Dict, Optional, Type
 
 import requests
 
 from royaleapi.constants import ClanBattleType
-from royaleapi.error import (RoyaleAPIError, InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized,
-                             NotFound, TooManyRequests, InternalServerError, ServerUnderMaintenance, ServerOffline)
-from royaleapi.models import Battle, ChestCycle, Clan, Player, ServerStatus
-from royaleapi.utils import tag_check, ExpiringDict
+from royaleapi.error import (RoyaleAPIError, InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized, NotFound,
+                             TooManyRequests, InternalServerError, ServerUnderMaintenance, ServerOffline)
+from royaleapi.models import Battle, ChestCycle, Clan, ClanWar, Player, ServerStatus
+from royaleapi.utils import is_iterable, validate_tag, ExpiringDict
 
 
 class RoyaleAPIClient:
@@ -30,6 +30,9 @@ class RoyaleAPIClient:
             if constants_cache_time > 0:
                 self._cache["constants"] = ExpiringDict(timeout=constants_cache_time, capacity=2)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(use_cache={self._cache is not None})"
+
     def __enter__(self) -> "RoyaleAPIClient":
         return self
 
@@ -45,6 +48,21 @@ class RoyaleAPIClient:
         if not api_token or not isinstance(api_token, str) or any(c.isspace() for c in api_token):
             raise InvalidToken
         return api_token
+
+    @staticmethod
+    def _tag_check(tags: str or List[str], args: Tuple[str, ...]) -> Tuple[List[str], bool]:
+        given_single_tag = False
+        if isinstance(tags, str):
+            if args:
+                tags = [validate_tag(tag) for tag in (tags, *args)]
+            else:
+                tags = [validate_tag(tags)]
+                given_single_tag = True
+        elif is_iterable(tags):
+            tags = [validate_tag(tag) for tag in (*tags, *args)] if args else [validate_tag(tag) for tag in tags]
+        else:
+            raise ValueError("Given argument(s) is/are not a tag nor iterables of them")
+        return tags, given_single_tag
 
     def _purge_cache(self, cache_type: str = "dynamic") -> None:
         self._cache[cache_type].purge()
@@ -132,21 +150,21 @@ class RoyaleAPIClient:
         return data
 
     def get_player(self, player_tags: str or List[str], *args: str, use_cache: bool = True) -> Player or List[Player]:
-        tags, given_single_tag = tag_check(player_tags, args)
+        tags, given_single_tag = self._tag_check(player_tags, args)
         keys = [f"p{tag}" for tag in tags]
         data = self._get_methods_with_tags_base("player/{}", tags, keys, use_cache)
-        return Player.de_json(data, client=self) if given_single_tag else Player.de_list(data, client=self)
+        return Player.de_json(data, self) if given_single_tag else Player.de_list(data, self)
 
     def get_player_chests(self, player_tags: str or List[str], *args: str,
                           use_cache: bool = True) -> ChestCycle or List[ChestCycle]:
-        tags, given_single_tag = tag_check(player_tags, args)
+        tags, given_single_tag = self._tag_check(player_tags, args)
         keys = [f"pc{tag}" for tag in tags]
         data = self._get_methods_with_tags_base("player/{}/chests", tags, keys, use_cache)
-        return ChestCycle.de_json(data, client=self) if given_single_tag else ChestCycle.de_list(data, client=self)
+        return ChestCycle.de_json(data, self) if given_single_tag else ChestCycle.de_list(data, self)
 
     def get_player_battles(self, player_tags: str or List[str], *args: str, max_results: Optional[int] = None,
                            page: Optional[int] = None, use_cache: bool = True) -> List[Battle]:
-        tags = tag_check(player_tags, args)[0]
+        tags = self._tag_check(player_tags, args)[0]
         keys = [f"pb{tag}" for tag in tags]
         # Does not use _get_methods_with_tags_base since all battles of diff players are merged into same list
         try:
@@ -158,20 +176,20 @@ class RoyaleAPIClient:
             data = self._get_methods_args_processor(f"player/{','.join(tags)}/battle", max_results, page)
             if len(tags) == 1 and self._cache and self._cache["dynamic"] is not None:
                 self._save_in_cache(keys, data)
-        return Battle.de_list(data, client=self)
+        return Battle.de_list(data, self)
 
     def get_clan(self, clan_tags: str or List[str], *args: str, use_cache: bool = True) -> Clan or List[Clan]:
-        tags, given_single_tag = tag_check(clan_tags, args)
+        tags, given_single_tag = self._tag_check(clan_tags, args)
         keys = [f"c{tag}" for tag in tags]
         data = self._get_methods_with_tags_base("clan/{}", tags, keys, use_cache)
-        return Clan.de_json(data, client=self) if given_single_tag else Clan.de_list(data, client=self)
+        return Clan.de_json(data, self) if given_single_tag else Clan.de_list(data, self)
 
     def get_clan_battles(self, clan_tags: str or List[str], *args: str, battle_type: str = ClanBattleType.CLANMATE,
                          max_results: Optional[int] = None, page: Optional[int] = None,
                          use_cache: bool = True) -> List[Battle]:
         if battle_type not in (ClanBattleType.ALL, ClanBattleType.CLANMATE, ClanBattleType.WAR):
             raise ValueError("Invalid battle type")
-        tags = tag_check(clan_tags, args)[0]
+        tags = self._tag_check(clan_tags, args)[0]
         keys = [f"cb{battle_type[0].lower()}{tag}" for tag in tags]
         # Does not use _get_methods_with_tags_base since all battles of diff players are merged into same list
         try:
@@ -184,7 +202,13 @@ class RoyaleAPIClient:
                                                     max_results, page, type=battle_type)
             if len(tags) == 1 and self._cache and self._cache["dynamic"] is not None:
                 self._save_in_cache(keys, data)
-        return Battle.de_list(data, client=self)
+        return Battle.de_list(data, self)
+
+    def get_clan_war(self, clan_tags: str or List[str], *args: str, use_cache: bool = True) -> ClanWar or List[ClanWar]:
+        tags, given_single_tag = self._tag_check(clan_tags, args)
+        keys = [f"cw{tag}" for tag in tags]
+        data = self._get_methods_with_tags_base("clan/{}/war", tags, keys, use_cache)
+        return ClanWar.de_json(data, self) if given_single_tag else ClanWar.de_list(data, self)
 
     def search_clan(self, name: Optional[str] = None, min_score: Optional[int] = None,
                     min_members: Optional[int] = None, max_members: Optional[int] = None,
@@ -199,7 +223,7 @@ class RoyaleAPIClient:
         assert location_id is None or 57000000 <= location_id <= 57000260, "Parameter 'location_id' is not a valid"
         assert not all([param is None for param in (name, min_score, min_members, max_members, location_id)]), (
             "At least one search parameter is required")
-        key = f"cs?name={name}&min_score={min_score}&min={min_members}&max={max_members}&loc_id={location_id}"
+        key = f"cs?n={name}&ms={min_score}&mim={min_members}&mam={max_members}&li={location_id}"
         try:
             assert self._cache and use_cache and self._cache["dynamic"] is not None
             self._purge_cache()
@@ -210,7 +234,7 @@ class RoyaleAPIClient:
                                                     maxMembers=max_members, locationId=location_id)
             if self._cache and self._cache["dynamic"] is not None:
                 self._save_in_cache(key, data)
-        return Clan.de_list(data, client=self)
+        return Clan.de_list(data, self)
 
     def get_version(self, use_cache: bool = True) -> str:
         return self._get_methods_base("version", "v", use_cache, return_text=True)
@@ -219,7 +243,7 @@ class RoyaleAPIClient:
         return self._get_methods_base("health", "h", use_cache, return_text=True)
 
     def get_status(self, use_cache: bool = True) -> ServerStatus:
-        return ServerStatus.de_json(self._get_methods_base("status", "s", use_cache), client=self)
+        return ServerStatus.de_json(self._get_methods_base("status", "s", use_cache), self)
 
     def get_endpoints(self, use_cache: bool = True) -> List[str]:
         return self._get_methods_base("endpoints", "e", use_cache, cache_type="constants")
@@ -229,3 +253,5 @@ class RoyaleAPIClient:
     get_players_chests = get_player_chests
     get_clans = get_clan
     get_clans_battles = get_clan_battles
+    get_clans_war = get_clan_war
+    search_clans = search_clan

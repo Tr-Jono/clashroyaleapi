@@ -1,7 +1,7 @@
 import re
 import time
 from collections import OrderedDict
-from typing import List, Tuple, Generator, Iterable, Any, Optional
+from typing import Tuple, Generator, Iterable, Any, Optional
 
 from royaleapi.constants import VALID_TAG_CHARS
 from royaleapi.error import InvalidTag
@@ -23,21 +23,6 @@ def validate_tag(tag: str) -> str:
     if not isinstance(tag, str) or tag == "" or len(tag) < 3 or any([c for c in tag if c not in VALID_TAG_CHARS]):
         raise InvalidTag
     return tag
-
-
-def tag_check(tags: str or List[str], args: Tuple[str, ...]) -> Tuple[List[str], bool]:
-    given_single_tag = False
-    if isinstance(tags, str):
-        if args:
-            tags = [validate_tag(tag) for tag in (tags, *args)]
-        else:
-            tags = [validate_tag(tags)]
-            given_single_tag = True
-    elif is_iterable(tags):
-        tags = [validate_tag(tag) for tag in (*tags, *args)] if args else [validate_tag(tag) for tag in tags]
-    else:
-        raise ValueError("Given argument(s) is/are not a tag nor iterables of them.")
-    return tags, given_single_tag
 
 
 class ExpiringDict(OrderedDict):
