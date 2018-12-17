@@ -25,6 +25,7 @@ class Clan(CRObject):
     required_score: Optional[int] = field(default=None, compare=False)
     total_donations: Optional[int] = field(default=None, compare=False)
     location: Optional[Location] = field(default=None, compare=False)
+    # Not returned in "clan/search" endpoint
     members: List[ClanMember] = field(default_factory=list, compare=False)
     tracking: Optional[ClanTracking] = field(default=None, compare=False)
 

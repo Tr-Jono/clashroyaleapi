@@ -96,12 +96,10 @@ class RoyaleAPIClient:
     def _get_methods_args_processor(self, endpoint: str, max_results: Optional[int] = None,
                                     page: Optional[int] = None, **kwargs) -> Dict or List[Dict]:
         endpoint = requests.utils.quote(endpoint, safe=":/")
-        if max_results is not None and not isinstance(max_results, int) and max_results < 1:
-            raise ValueError("Parameter 'max_results' must be a positive integer if given")
-        if page is not None and not isinstance(page, int) and page < 0:
-            raise ValueError("Parameters 'page' must be a non-negative integer if given")
-        if page and not max_results:
-            raise ValueError("Parameter 'max_results' must be provided if parameter 'page' is given")
+        assert max_results is None or max_results > 0, "Parameter 'max_results' must be > 0 if given"
+        assert page is None or page >= 0, "Parameter 'page' must be >= 0 if given"
+        if page is not None:
+            assert max_results is not None, "Parameter 'max_results' must be provided if parameter 'page' is given"
         kwargs.update({"max": max_results, "page": page})
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         return self._request(endpoint, params=kwargs)
@@ -137,14 +135,14 @@ class RoyaleAPIClient:
         tags, given_single_tag = tag_check(player_tags, args)
         keys = [f"p{tag}" for tag in tags]
         data = self._get_methods_with_tags_base("player/{}", tags, keys, use_cache)
-        return Player.de_json(data, self) if given_single_tag else Player.de_list(data, self)
+        return Player.de_json(data, client=self) if given_single_tag else Player.de_list(data, client=self)
 
     def get_player_chests(self, player_tags: str or List[str], *args: str,
                           use_cache: bool = True) -> ChestCycle or List[ChestCycle]:
         tags, given_single_tag = tag_check(player_tags, args)
         keys = [f"pc{tag}" for tag in tags]
         data = self._get_methods_with_tags_base("player/{}/chests", tags, keys, use_cache)
-        return ChestCycle.de_json(data, self) if given_single_tag else ChestCycle.de_list(data, self)
+        return ChestCycle.de_json(data, client=self) if given_single_tag else ChestCycle.de_list(data, client=self)
 
     def get_player_battles(self, player_tags: str or List[str], *args: str, max_results: Optional[int] = None,
                            page: Optional[int] = None, use_cache: bool = True) -> List[Battle]:
@@ -160,13 +158,13 @@ class RoyaleAPIClient:
             data = self._get_methods_args_processor(f"player/{','.join(tags)}/battle", max_results, page)
             if len(tags) == 1 and self._cache and self._cache["dynamic"] is not None:
                 self._save_in_cache(keys, data)
-        return Battle.de_list(data, self)
+        return Battle.de_list(data, client=self)
 
     def get_clan(self, clan_tags: str or List[str], *args: str, use_cache: bool = True) -> Clan or List[Clan]:
         tags, given_single_tag = tag_check(clan_tags, args)
         keys = [f"c{tag}" for tag in tags]
         data = self._get_methods_with_tags_base("clan/{}", tags, keys, use_cache)
-        return Clan.de_json(data, self) if given_single_tag else Clan.de_list(data, self)
+        return Clan.de_json(data, client=self) if given_single_tag else Clan.de_list(data, client=self)
 
     def get_clan_battles(self, clan_tags: str or List[str], *args: str, battle_type: str = ClanBattleType.CLANMATE,
                          max_results: Optional[int] = None, page: Optional[int] = None,
@@ -186,7 +184,33 @@ class RoyaleAPIClient:
                                                     max_results, page, type=battle_type)
             if len(tags) == 1 and self._cache and self._cache["dynamic"] is not None:
                 self._save_in_cache(keys, data)
-        return Battle.de_list(data, self)
+        return Battle.de_list(data, client=self)
+
+    def search_clan(self, name: Optional[str] = None, min_score: Optional[int] = None,
+                    min_members: Optional[int] = None, max_members: Optional[int] = None,
+                    location_id: Optional[int] = None, max_results: Optional[int] = None,
+                    page: Optional[int] = None, use_cache: bool = True) -> List[Clan]:
+        assert len(name) > 3, "The length of parameter 'name' must be >= 3 if given"
+        assert min_score is None or min_score >= 0, "Parameter 'score' must be a non-negative integer if given"
+        assert min_members is None or 2 <= min_members <= 50, "2 <= paramter 'min_members' <= 50 must be True if given"
+        assert max_members is None or 2 <= max_members <= 50, "2 <= paramter 'max_members' <= 50 must be True if given"
+        if min_members and max_members:
+            assert min_members <= max_members, "Paramter 'min_members' must be <= parameter 'max_members'"
+        assert location_id is None or 57000000 <= location_id <= 57000260, "Parameter 'location_id' is not a valid"
+        assert not all([param is None for param in (name, min_score, min_members, max_members, location_id)]), (
+            "At least one search parameter is required")
+        key = f"cs?name={name}&min_score={min_score}&min={min_members}&max={max_members}&loc_id={location_id}"
+        try:
+            assert self._cache and use_cache and self._cache["dynamic"] is not None
+            self._purge_cache()
+            data = self._fetch_from_cache(key, "dynamic")
+        except (AssertionError, KeyError):
+            data = self._get_methods_args_processor("clan/search", max_results, page, name=name,
+                                                    score=min_score, minMembers=min_members,
+                                                    maxMembers=max_members, locationId=location_id)
+            if self._cache and self._cache["dynamic"] is not None:
+                self._save_in_cache(key, data)
+        return Clan.de_list(data, client=self)
 
     def get_version(self, use_cache: bool = True) -> str:
         return self._get_methods_base("version", "v", use_cache, return_text=True)
@@ -195,7 +219,7 @@ class RoyaleAPIClient:
         return self._get_methods_base("health", "h", use_cache, return_text=True)
 
     def get_status(self, use_cache: bool = True) -> ServerStatus:
-        return ServerStatus.de_json(self._get_methods_base("status", "s", use_cache), self)
+        return ServerStatus.de_json(self._get_methods_base("status", "s", use_cache), client=self)
 
     def get_endpoints(self, use_cache: bool = True) -> List[str]:
         return self._get_methods_base("endpoints", "e", use_cache, cache_type="constants")

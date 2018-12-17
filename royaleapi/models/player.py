@@ -61,7 +61,7 @@ class Player(CRObject):
         return self.client.get_player_battles(self.tag, use_cache=use_cache)
 
     def get_clan(self, use_cache: bool = True) -> Optional[Clan]:
-        return self.client.get_clan(self.clan.tag, use_cache=use_cache) if self.clan else None
+        return self.clan.get_full_clan(use_cache=use_cache) if self.clan else None
 
     @classmethod
     def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Player"]:
