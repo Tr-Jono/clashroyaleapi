@@ -6,7 +6,7 @@ import requests
 
 from royaleapi.constants import ClanBattleType
 from royaleapi.error import RoyaleAPIError, InvalidToken, ServerResponseInvalid, error_dict
-from royaleapi.models import Battle, ChestCycle, Clan, ClanTracking, ClanWar, Player, ServerStatus
+from royaleapi.models import Battle, ChestCycle, Clan, ClanTracking, ClanWar, Player, ServerStatus, Tournament
 from royaleapi.utils import is_iterable, validate_tag, ExpiringDict
 
 
@@ -212,12 +212,12 @@ class RoyaleAPIClient:
                      min_members: Optional[int] = None, max_members: Optional[int] = None,
                      location_id: Optional[int] = None, max_results: Optional[int] = None,
                      page: Optional[int] = None, use_cache: bool = True) -> List[Clan]:
-        assert len(name) > 3, "The length of parameter 'name' must be >= 3 if given"
+        assert len(name) >= 3, "The length of parameter 'name' must be >= 3 if given"
         assert min_score is None or min_score >= 0, "Parameter 'score' must be a non-negative integer if given"
-        assert min_members is None or 2 <= min_members <= 50, "2 <= paramter 'min_members' <= 50 must be True if given"
-        assert max_members is None or 2 <= max_members <= 50, "2 <= paramter 'max_members' <= 50 must be True if given"
+        assert min_members is None or 2 <= min_members <= 50, "2 <= parameter 'min_members' <= 50 must be True if given"
+        assert max_members is None or 2 <= max_members <= 50, "2 <= parameter 'max_members' <= 50 must be True if given"
         if min_members and max_members:
-            assert min_members <= max_members, "Paramter 'min_members' must be <= parameter 'max_members'"
+            assert min_members <= max_members, "Parameter 'min_members' must be <= parameter 'max_members'"
         assert location_id is None or 57000000 <= location_id <= 57000260, "Parameter 'location_id' is not a valid"
         assert any([param is not None for param in (name, min_score, min_members, max_members, location_id)]), (
             "At least one search parameter is required")
@@ -233,6 +233,12 @@ class RoyaleAPIClient:
             if self._cache and self._cache["dynamic"] is not None:
                 self._save_in_cache(key, data)
         return Clan.de_list(data, self)
+
+    def get_tournament(self, tournament_tags: str or List[str], *args: str, use_cache: bool = True) -> Tournament:
+        tags, given_single_tag = self._tag_check(tournament_tags, args)
+        keys = [f"t{tag}" for tag in tags]
+        data = self._get_methods_with_tags_base("tournament/{}", tags, keys, use_cache)
+        return Tournament.de_json(data, self) if given_single_tag else Tournament.de_list(data, self)
 
     def get_version(self, use_cache: bool = True) -> str:
         return self._get_methods_base("version", "v", use_cache, return_text=True)
@@ -252,3 +258,4 @@ class RoyaleAPIClient:
     get_clans = get_clan
     get_clans_tracking = get_clan_tracking
     track_clans = track_clan
+    get_tournaments = get_tournament

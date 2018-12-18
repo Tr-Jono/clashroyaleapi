@@ -54,14 +54,14 @@ class Player(CRObject):
     def get_player(self, use_cache: bool = True) -> "Player":
         return self.client.get_player(self.tag, use_cache=use_cache)
 
+    def get_clan(self, use_cache: bool = True) -> Optional[Clan]:
+        return self.clan.get_clan(use_cache=use_cache) if self.clan else None
+
     def get_chests(self, use_cache: bool = True) -> ChestCycle:
         return self.client.get_player_chests(self.tag, use_cache=use_cache)
 
     def get_battles(self, use_cache: bool = True) -> List["Battle"]:
         return self.client.get_player_battles(self.tag, use_cache=use_cache)
-
-    def get_clan(self, use_cache: bool = True) -> Optional[Clan]:
-        return self.clan.get_full_clan(use_cache=use_cache) if self.clan else None
 
     @classmethod
     def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Player"]:

@@ -15,7 +15,12 @@ if TYPE_CHECKING:
 class Clan(CRObject):
     tag: str
     name: str = field(compare=False)
-    badge: ClanBadge = field(compare=False)
+
+    # Most endpoints have this
+    badge: Optional[ClanBadge] = field(default=None, compare=False)
+
+    # Tournament endpoint only
+    badge_id: Optional[int] = field(default=None, compare=False)
 
     # Clan endpoint only
     description: Optional[str] = field(default=None, compare=False)

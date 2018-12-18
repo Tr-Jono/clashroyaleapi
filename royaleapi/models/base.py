@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class CRObject(metaclass=ABCMeta):
-    def __eq__(self, other: Any) -> bool:  # CRObjects (dataclasses) that do not implement __eq__ fall back to this
+    def __eq__(self, other: Any) -> bool:  # CRObjects that do not implement __eq__ fall back to this
         if self.__class__ is other.__class__:
             raise ValueError("The two objects are not comparable!")
         return NotImplemented

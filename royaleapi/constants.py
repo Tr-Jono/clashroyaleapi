@@ -25,3 +25,12 @@ class ClanWarState:
     COLLECTION_DAY = "collectionDay"
     MATCHMAKING = "matchmaking"
     WAR_DAY = "warDay"
+
+
+class TournamentState:
+    IN_PREPARATION = "inPreparation"
+    IN_PROGRESS = "inProgress"
+    ENDED = "ended"
+
+
+# TODO: Battle types
