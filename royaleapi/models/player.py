@@ -23,7 +23,7 @@ class Player(CRObject):
     deck_link: str = field(compare=False)
     deck: List[Card] = field(compare=False)
 
-    # Only returned from "player" endpoint
+    # Player endpoint only
     trophies: int = field(default=None, compare=False)
     arena: Arena = field(default=None, compare=False)
     rank: Optional[int] = field(default=None, compare=False)
@@ -34,7 +34,7 @@ class Player(CRObject):
     cards: List[Card] = field(default=None, compare=False)
     achievements: List[Achievement] = field(default=None, compare=False)
 
-    # Only present in Battle objects
+    # Battle participants only
     crowns_earned: int = field(default=None, compare=False)
     start_trophies: int = field(default=None, compare=False)
     trophy_change: int = field(default=None, compare=False)
@@ -51,7 +51,7 @@ class Player(CRObject):
         self.cards = Card.de_list(self.cards, self.client)
         self.achievements = Achievement.de_list(self.achievements, self.client)
 
-    def get_full_player(self, use_cache: bool = True) -> "Player":
+    def get_player(self, use_cache: bool = True) -> "Player":
         return self.client.get_player(self.tag, use_cache=use_cache)
 
     def get_chests(self, use_cache: bool = True) -> ChestCycle:

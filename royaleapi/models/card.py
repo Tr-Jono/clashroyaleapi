@@ -18,7 +18,7 @@ class Card(CRObject):
     description: str = field(compare=False)
     card_id: int = field(compare=False)
 
-    # only present in Player objects
+    # Players' cards only
     level: Optional[int] = field(default=None, compare=False)
     star_level: Optional[int] = field(default=None, compare=False)  # Not given if star_level is 0
     max_level: Optional[int] = field(default=None, compare=False)

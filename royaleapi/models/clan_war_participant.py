@@ -8,14 +8,14 @@ if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
 
 
-@dataclass(eq=False)
+@dataclass
 class ClanWarParticipant(CRObject):
     tag: str
-    name: str
-    cards_earned: int
-    battles_played: int
-    wins: int
-    collection_day_battles_played: int
+    name: str = field(compare=False)
+    cards_earned: int = field(compare=False)
+    battles_played: int = field(compare=False)
+    wins: int = field(compare=False)
+    collection_day_battles_played: int = field(compare=False)
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 

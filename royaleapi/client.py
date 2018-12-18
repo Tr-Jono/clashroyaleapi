@@ -5,8 +5,7 @@ from typing import List, Tuple, Dict, Optional, Type
 import requests
 
 from royaleapi.constants import ClanBattleType
-from royaleapi.error import (RoyaleAPIError, InvalidToken, ServerResponseInvalid, BadRequest, Unauthorized, NotFound,
-                             TooManyRequests, InternalServerError, ServerUnderMaintenance, ServerOffline)
+from royaleapi.error import RoyaleAPIError, InvalidToken, ServerResponseInvalid, error_dict
 from royaleapi.models import Battle, ChestCycle, Clan, ClanTracking, ClanWar, Player, ServerStatus
 from royaleapi.utils import is_iterable, validate_tag, ExpiringDict
 
@@ -67,7 +66,7 @@ class RoyaleAPIClient:
     def _purge_cache(self, cache_type: str = "dynamic") -> None:
         self._cache[cache_type].purge()
 
-    def _fetch_from_cache(self, keys: str or List[str], cache_type: str) -> Dict or List[Dict]:
+    def _fetch_from_cache(self, keys: str or List[str], cache_type: str = "dynamic") -> Dict or List[Dict]:
         if isinstance(keys, str):
             return self._cache[cache_type][keys]
         return [self._cache[cache_type][key] for key in keys]
@@ -91,24 +90,12 @@ class RoyaleAPIClient:
             data = json.loads(response.content.decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
             raise ServerResponseInvalid("Invalid server response")
-        if isinstance(data, dict) and data.get("error"):
-            status, message = data.get("status"), data.get("message", "")
-            if status == 400:
-                raise BadRequest(message)
-            elif status == 401:
-                raise Unauthorized(message)
-            elif status == 404:
-                raise NotFound(message)
-            elif status == 429:
-                raise TooManyRequests(message)
-            elif status == 500:
-                raise InternalServerError(message)
-            elif status == 503:
-                raise ServerUnderMaintenance(message)
-            elif status == 522:
-                raise ServerOffline(message)
-            else:
-                raise RoyaleAPIError(message)
+        if isinstance(data, dict) and "error" in data:
+            status = data["status"]
+            message = data["message"]
+            if status in error_dict:
+                raise error_dict[status](message)
+            raise RoyaleAPIError(message)
         return data
 
     def _get_methods_args_processor(self, endpoint: str, max_results: Optional[int] = None,
@@ -170,7 +157,7 @@ class RoyaleAPIClient:
         try:
             assert self._cache and use_cache and self._cache["dynamic"] is not None and max_results is page is None
             self._purge_cache()
-            data = self._fetch_from_cache(keys, "dynamic")
+            data = self._fetch_from_cache(keys)
             data = data[0] if len(data) == 1 else [b for i in data for b in i]
         except (AssertionError, KeyError):
             data = self._get_methods_args_processor(f"player/{','.join(tags)}/battle", max_results, page)
@@ -184,31 +171,30 @@ class RoyaleAPIClient:
         data = self._get_methods_with_tags_base("clan/{}", tags, keys, use_cache)
         return Clan.de_json(data, self) if given_single_tag else Clan.de_list(data, self)
 
-    def get_clan_battles(self, clan_tags: str or List[str], *args: str, battle_type: str = ClanBattleType.CLANMATE,
+    def get_clan_battles(self, clan_tag: str, battle_type: str = ClanBattleType.CLANMATE,
                          max_results: Optional[int] = None, page: Optional[int] = None,
                          use_cache: bool = True) -> List[Battle]:
         if battle_type not in (ClanBattleType.ALL, ClanBattleType.CLANMATE, ClanBattleType.WAR):
             raise ValueError("Invalid battle type")
-        tags = self._tag_check(clan_tags, args)[0]
-        keys = [f"cb{battle_type[0].lower()}{tag}" for tag in tags]
-        # Does not use _get_methods_with_tags_base since all battles of diff players are merged into same list
-        try:
-            assert self._cache and use_cache and self._cache["dynamic"] is not None and max_results is page is None
-            self._purge_cache()
-            data = self._fetch_from_cache(keys, "dynamic")
-            data = data[0] if len(data) == 1 else [b for i in data for b in i]
-        except (AssertionError, KeyError):
-            data = self._get_methods_args_processor(f"clan/{','.join(tags)}/battle",
-                                                    max_results, page, type=battle_type)
-            if len(tags) == 1 and self._cache and self._cache["dynamic"] is not None:
-                self._save_in_cache(keys, data)
+        tag = validate_tag(clan_tag)
+        key = f"cb{battle_type[0].lower()}{tag}"
+        data = self._get_methods_with_tags_base("clan/{}/battle", [tag], [key], use_cache,
+                                                max_results=max_results, page=page)
         return Battle.de_list(data, self)
 
-    def get_clan_war(self, clan_tags: str or List[str], *args: str, use_cache: bool = True) -> ClanWar or List[ClanWar]:
-        tags, given_single_tag = self._tag_check(clan_tags, args)
-        keys = [f"cw{tag}" for tag in tags]
-        data = self._get_methods_with_tags_base("clan/{}/war", tags, keys, use_cache)
-        return ClanWar.de_json(data, self) if given_single_tag else ClanWar.de_list(data, self)
+    def get_clan_war(self, clan_tag: str, use_cache: bool = True) -> ClanWar:
+        tag = validate_tag(clan_tag)
+        key = f"cw{tag}"
+        data = self._get_methods_with_tags_base("clan/{}/war", [tag], [key], use_cache)
+        return ClanWar.de_json(data, self)
+
+    def get_clan_war_log(self, clan_tag: str, use_cache: bool = True,
+                         max_results: Optional[int] = None, page: Optional[int] = None) -> List[ClanWar]:
+        tag = validate_tag(clan_tag)
+        key = f"cwl{tag}"
+        data = self._get_methods_with_tags_base("clan/{}/warlog", [tag], [key], use_cache,
+                                                max_results=max_results, page=page)
+        return ClanWar.de_list(data, self)
 
     def get_clan_tracking(self, clan_tags: str or List[str], *args: str,
                           use_cache: bool = True) -> ClanTracking or List[ClanTracking]:
@@ -217,10 +203,15 @@ class RoyaleAPIClient:
         data = self._get_methods_with_tags_base("clan/{}/tracking", tags, keys, use_cache)
         return ClanTracking.de_json(data, self) if given_single_tag else ClanTracking.de_list(data, self)
 
-    def search_clan(self, name: Optional[str] = None, min_score: Optional[int] = None,
-                    min_members: Optional[int] = None, max_members: Optional[int] = None,
-                    location_id: Optional[int] = None, max_results: Optional[int] = None,
-                    page: Optional[int] = None, use_cache: bool = True) -> List[Clan]:
+    def track_clan(self, clan_tags: str or List[str], *args: str) -> bool:
+        tags = self._tag_check(clan_tags, args)[0]
+        data = self._request(f"clan/{','.join(tags)}/track")
+        return data["success"]
+
+    def search_clans(self, name: Optional[str] = None, min_score: Optional[int] = None,
+                     min_members: Optional[int] = None, max_members: Optional[int] = None,
+                     location_id: Optional[int] = None, max_results: Optional[int] = None,
+                     page: Optional[int] = None, use_cache: bool = True) -> List[Clan]:
         assert len(name) > 3, "The length of parameter 'name' must be >= 3 if given"
         assert min_score is None or min_score >= 0, "Parameter 'score' must be a non-negative integer if given"
         assert min_members is None or 2 <= min_members <= 50, "2 <= paramter 'min_members' <= 50 must be True if given"
@@ -228,13 +219,13 @@ class RoyaleAPIClient:
         if min_members and max_members:
             assert min_members <= max_members, "Paramter 'min_members' must be <= parameter 'max_members'"
         assert location_id is None or 57000000 <= location_id <= 57000260, "Parameter 'location_id' is not a valid"
-        assert not all([param is None for param in (name, min_score, min_members, max_members, location_id)]), (
+        assert any([param is not None for param in (name, min_score, min_members, max_members, location_id)]), (
             "At least one search parameter is required")
         key = f"cs?n={name}&ms={min_score}&mim={min_members}&mam={max_members}&li={location_id}"
         try:
             assert self._cache and use_cache and self._cache["dynamic"] is not None
             self._purge_cache()
-            data = self._fetch_from_cache(key, "dynamic")
+            data = self._fetch_from_cache(key)
         except (AssertionError, KeyError):
             data = self._get_methods_args_processor("clan/search", max_results, page, name=name,
                                                     score=min_score, minMembers=min_members,
@@ -259,7 +250,5 @@ class RoyaleAPIClient:
     get_players_battles = get_player_battles
     get_players_chests = get_player_chests
     get_clans = get_clan
-    get_clans_battles = get_clan_battles
-    get_clans_war = get_clan_war
     get_clans_tracking = get_clan_tracking
-    search_clans = search_clan
+    track_clans = track_clan

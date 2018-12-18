@@ -13,20 +13,29 @@ if TYPE_CHECKING:
 
 @dataclass(eq=False)
 class ClanWar(CRObject):
-    state: str
+    # Clan war endpoint only
+    state: Optional[str] = None
 
-    # In war only
+    # Collection day / Matchmaking / War day only
     clan: Optional[Clan] = None
+
+    # Collection day / Matchmaking / War day / War log only
     participants: Optional[List[ClanWarParticipant]] = field(default_factory=list)
 
     # Collection day only
     collection_end_time: Optional[int] = None
 
-    # Matchmaking / war day only
+    # Matchmaking / War day only
     war_end_time: Optional[int] = None
+
+    # Matchmaking / War day / War log only
     standings: Optional[List[Clan]] = field(default_factory=list)
 
-    client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
+    # War log only
+    created_date: Optional[int] = None
+    season_number: Optional[int] = None
+
+    client: Optional["RoyaleAPIClient"] = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         self.clan = Clan.de_json(self.clan, self.client)
@@ -37,6 +46,11 @@ class ClanWar(CRObject):
         if self.state == ClanWarState.NOT_IN_WAR:
             raise ValueError("No ongoing war")
         return datetime.utcfromtimestamp(self.collection_end_time or self.war_end_time).replace(tzinfo=timezone.utc)
+
+    def created_datetime(self) -> datetime:
+        if not self.created_date:
+            raise ValueError("War is not in war log")
+        return datetime.utcfromtimestamp(self.created_date).replace(tzinfo=timezone.utc)
 
     @classmethod
     def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["ClanWar"]:

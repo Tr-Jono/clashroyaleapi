@@ -17,7 +17,7 @@ class Clan(CRObject):
     name: str = field(compare=False)
     badge: ClanBadge = field(compare=False)
 
-    # Only returned from "clan" endpoint
+    # Clan endpoint only
     description: Optional[str] = field(default=None, compare=False)
     clan_type: Optional[str] = field(default=None, compare=False)
     score: Optional[int] = field(default=None, compare=False)
@@ -29,18 +29,21 @@ class Clan(CRObject):
     members: List[ClanMember] = field(default_factory=list, compare=False)
     tracking: Optional[ClanTracking] = field(default=None, compare=False)
 
-    # Only present in Player objects
+    # Player endpoint only
     role: Optional[str] = field(default=None, compare=False)
     player_donations: Optional[int] = field(default=None, compare=False)
     donations_received: Optional[int] = field(default=None, compare=False)
     donations_delta: Optional[int] = field(default=None, compare=False)
 
-    # Only returned from "clan/:tag/war" endpoint
+    # Clan war endpoint only
     participants: Optional[int] = field(default=None, compare=False)
     battles_played: Optional[int] = field(default=None, compare=False)
     wins: Optional[int] = field(default=None, compare=False)
     crowns: Optional[int] = field(default=None, compare=False)
     war_trophies: Optional[int] = field(default=None, compare=False)
+
+    # Clan war log endpoint only
+    war_trophies_change: Optional[int] = field(default=None, compare=False)
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
@@ -50,7 +53,7 @@ class Clan(CRObject):
         self.members = ClanMember.de_list(self.members, self.client)
         self.tracking = ClanTracking.de_json(self.tracking, self.client)
 
-    def get_full_clan(self, use_cache: bool = True) -> "Clan":
+    def get_clan(self, use_cache: bool = True) -> "Clan":
         return self.client.get_clan(self.tag, use_cache=use_cache)
 
     @classmethod

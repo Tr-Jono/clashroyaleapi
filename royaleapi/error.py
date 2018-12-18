@@ -32,6 +32,10 @@ class NotFound(RequestError):
     pass
 
 
+class ClanNotTracked(RequestError):
+    pass
+
+
 class TooManyRequests(RequestError):
     pass
 
@@ -50,3 +54,15 @@ class ServerUnderMaintenance(ServiceUnavailable):
 
 class ServerOffline(ServiceUnavailable):
     pass
+
+
+error_dict = {
+    400: BadRequest,
+    401: Unauthorized,
+    404: NotFound,
+    417: ClanNotTracked,
+    429: TooManyRequests,
+    500: InternalServerError,
+    503: ServerUnderMaintenance,
+    522: ServerOffline
+}

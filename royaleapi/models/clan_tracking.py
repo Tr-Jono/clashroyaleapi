@@ -16,7 +16,7 @@ class ClanTracking(CRObject):
     # If clan is tracked
     legible: Optional[bool] = None
 
-    # Only returned in "tracking" endpoint
+    # Tracking endpoint only
     tag: Optional[str] = None
 
     @classmethod
