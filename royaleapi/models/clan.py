@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, TYPE_CHECKING
+from typing import List, Dict, Optional, Any, TYPE_CHECKING
 
+from royaleapi.constants import ClanBattleType
 from royaleapi.models.base import CRObject
 from royaleapi.models.clan_badge import ClanBadge
 from royaleapi.models.clan_member import ClanMember
@@ -9,6 +10,8 @@ from royaleapi.models.location import Location
 
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
+    from royaleapi.models.battle import Battle
+    from royaleapi.models.clan_war import ClanWar
 
 
 @dataclass
@@ -26,6 +29,7 @@ class Clan(CRObject):
     description: Optional[str] = field(default=None, compare=False)
     clan_type: Optional[str] = field(default=None, compare=False)
     score: Optional[int] = field(default=None, compare=False)
+    war_trophies: Optional[int] = field(default=None, compare=False)  # Also in clan war endpoint
     member_count: Optional[int] = field(default=None, compare=False)
     required_score: Optional[int] = field(default=None, compare=False)
     total_donations: Optional[int] = field(default=None, compare=False)
@@ -45,7 +49,6 @@ class Clan(CRObject):
     battles_played: Optional[int] = field(default=None, compare=False)
     wins: Optional[int] = field(default=None, compare=False)
     crowns: Optional[int] = field(default=None, compare=False)
-    war_trophies: Optional[int] = field(default=None, compare=False)
 
     # Clan war log endpoint only
     war_trophies_change: Optional[int] = field(default=None, compare=False)
@@ -61,8 +64,26 @@ class Clan(CRObject):
     def get_clan(self, use_cache: bool = True) -> "Clan":
         return self.client.get_clan(self.tag, use_cache=use_cache)
 
+    def get_battles(self, battle_type: str = ClanBattleType.CLANMATE,
+                    max_results: Optional[int] = None, page: Optional[int] = None,
+                    use_cache: bool = True) -> List["Battle"]:
+        return self.client.get_clan_battles(self.tag, battle_type, max_results, page, use_cache)
+
+    def get_war(self, use_cache: bool = True) -> "ClanWar":
+        return self.client.get_clan_war(self.tag, use_cache)
+
+    def get_war_log(self, max_results: Optional[int] = None, page: Optional[int] = None,
+                    use_cache: bool = True) -> List["ClanWar"]:
+        return self.client.get_clan_war_log(self.tag, max_results, page, use_cache)
+
+    def get_tracking(self, use_cache: bool = True) -> ClanTracking or List[ClanTracking]:
+        return self.client.get_clan_tracking(self.tag, use_cache=use_cache)
+
+    def track(self) -> bool:
+        return self.client.track_clan(self.tag)
+
     @classmethod
-    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Clan"]:
+    def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Clan"]:
         if not data:
             return None
         data = super().de_json(data, client)

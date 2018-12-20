@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
 
@@ -20,7 +20,7 @@ class ClanTracking(CRObject):
     tag: Optional[str] = None
 
     @classmethod
-    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["ClanTracking"]:
+    def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["ClanTracking"]:
         if not data:
             return None
         data = super().de_json(data, client)

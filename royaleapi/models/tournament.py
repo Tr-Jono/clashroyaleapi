@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import List, Dict, Optional, TYPE_CHECKING
+from typing import List, Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
 from royaleapi.models.tournament_player import TournamentPlayer
@@ -22,10 +22,12 @@ class Tournament(CRObject):
     start_time: Optional[int] = field(compare=False)
     end_time: Optional[int] = field(compare=False)
     duration: int = field(compare=False)
-    description: str = field(compare=False)
-    updated_at: int = field(compare=False)
-    creator: TournamentPlayer = field(compare=False)
-    players: List[TournamentPlayer] = field(compare=False)
+
+    # Only from client.get_tournament()
+    description: Optional[str] = field(default=None, compare=False)
+    updated_at: Optional[int] = field(default=None, compare=False)
+    creator: Optional[TournamentPlayer] = field(default=None, compare=False)
+    players: Optional[List[TournamentPlayer]] = field(default_factory=list, compare=False)
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
@@ -47,13 +49,18 @@ class Tournament(CRObject):
         return datetime.utcfromtimestamp(self.end_time).replace(tzinfo=timezone.utc)
 
     def updated_at_datetime(self) -> datetime:
+        if not self.updated_at:
+            raise ValueError("Not a full tournament object")
         return datetime.utcfromtimestamp(self.updated_at).replace(tzinfo=timezone.utc)
 
     def duration_in_hours(self) -> int:
         return self.duration // 3600
 
+    def get_tournament(self, use_cache: bool = True) -> "Tournament":
+        return self.client.get_tournament(self.tag, use_cache=use_cache)
+
     @classmethod
-    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Tournament"]:
+    def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Tournament"]:
         if not data:
             return None
         data = super().de_json(data, client)

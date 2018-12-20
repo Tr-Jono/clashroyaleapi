@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import List, Dict, Optional, TYPE_CHECKING
+from typing import List, Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.constants import ClanWarState
 from royaleapi.models.base import CRObject
@@ -53,7 +53,7 @@ class ClanWar(CRObject):
         return datetime.utcfromtimestamp(self.created_date).replace(tzinfo=timezone.utc)
 
     @classmethod
-    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["ClanWar"]:
+    def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["ClanWar"]:
         if not data:
             return None
         data = super().de_json(data, client)

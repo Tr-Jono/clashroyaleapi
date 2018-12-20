@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
 
@@ -25,10 +25,11 @@ class Card(CRObject):
     count: Optional[int] = field(default=None, compare=False)
     required_for_upgrade: Optional[int or str] = field(default=None, compare=False)  # str can only be "Maxed"
     left_to_upgrade: Optional[int] = field(default=None, compare=False)
+    min_level: Optional[int] = field(default=None, compare=False)
     icon: Optional[str] = field(default=None, compare=False)
 
     @classmethod
-    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Card"]:
+    def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Card"]:
         if not data:
             return None
         data = super().de_json(data, client)

@@ -16,7 +16,7 @@ class CRObject(metaclass=ABCMeta):
     def __getitem__(self, item: str) -> Any:
         return self.__dict__[item]
 
-    def to_dict(self, _pretty_format: bool = False) -> Dict:
+    def to_dict(self, _pretty_format: bool = False) -> Dict[str, Any]:
         if _pretty_format:
             return {**self.__dict__, "_": self.__class__.__name__}
         else:
@@ -35,11 +35,11 @@ class CRObject(metaclass=ABCMeta):
         return CRObject._pretty_format(self)
 
     @classmethod
-    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Dict or "CRObject":
+    def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Dict[str, Any] or "CRObject":
         return {camel_to_snake(x): data[x] for x in data.copy()}
 
     @classmethod
-    def de_list(cls, data: List[Dict], client: "RoyaleAPIClient") -> List[Dict or "CRObject"]:
+    def de_list(cls, data: List[Dict[str, Any]], client: "RoyaleAPIClient") -> List[Dict[str, Any] or "CRObject"]:
         return [] if not data else [cls.de_json(obj, client) for obj in ([data] if isinstance(data, dict) else data)]
 
     @staticmethod

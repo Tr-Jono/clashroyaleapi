@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import List, Dict, Optional, TYPE_CHECKING
+from typing import List, Tuple, Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.models.arena import Arena
 from royaleapi.models.base import CRObject
@@ -44,12 +44,12 @@ class Battle(CRObject):
     def get_opponents(self, use_cache: bool = True) -> List[Player]:
         return self.client.get_players([p.tag for p in self.opponent], use_cache=use_cache)
 
-    def get_players(self, use_cache: bool = True) -> List[List[Player]]:
+    def get_players(self, use_cache: bool = True) -> Tuple[List[Player], List[Player]]:
         players = self.client.get_players([p.tag for p in self.team + self.opponent], use_cache=use_cache)
-        return [[players[0]], [players[1]]] if self.team_size == 1 else [[players[:2]], [players[2:]]]
+        return ([players[0]], [players[1]]) if self.team_size == 1 else ([players[:2]], [players[2:]])
 
     @classmethod
-    def de_json(cls, data: Dict, client: "RoyaleAPIClient") -> Optional["Battle"]:
+    def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Battle"]:
         if not data:
             return None
         data = super().de_json(data, client)
