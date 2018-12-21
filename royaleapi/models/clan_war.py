@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.constants import ClanWarState
@@ -32,7 +32,7 @@ class ClanWar(CRObject):
     standings: Optional[List[Clan]] = field(default_factory=list)
 
     # War log only
-    created_date: Optional[int] = None
+    end_time: Optional[int] = None
     season_number: Optional[int] = None
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False)
@@ -45,16 +45,16 @@ class ClanWar(CRObject):
     def end_datetime(self) -> datetime:
         if self.state == ClanWarState.NOT_IN_WAR:
             raise ValueError("No ongoing war")
-        return datetime.utcfromtimestamp(self.collection_end_time or self.war_end_time).replace(tzinfo=timezone.utc)
+        return datetime.fromtimestamp(self.collection_end_time or self.war_end_time or self.end_time)
 
-    def created_datetime(self) -> datetime:
-        if not self.created_date:
-            raise ValueError("War is not in war log")
-        return datetime.utcfromtimestamp(self.created_date).replace(tzinfo=timezone.utc)
+    def get_clan_total_cards_earned(self) -> int:
+        return sum(p.cards_earned for p in self.participants)
 
     @classmethod
     def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["ClanWar"]:
         if not data:
             return None
         data = super().de_json(data, client)
+        if "created_date" in data:
+            data["end_time"] = data.pop("created_date")
         return cls(client=client, **data)

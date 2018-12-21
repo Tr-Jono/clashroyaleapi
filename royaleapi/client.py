@@ -92,13 +92,13 @@ class RoyaleAPIClient:
         try:
             data = json.loads(response.content.decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
-            raise ServerResponseInvalid("Invalid server response")
+            raise ServerResponseInvalid("Invalid server response") from None
         if isinstance(data, dict) and "error" in data:
             status = data["status"]
             message = data["message"]
             if status in error_dict:
-                raise error_dict[status](message)
-            raise RoyaleAPIError(message)
+                raise error_dict[status](message) from None
+            raise RoyaleAPIError(message) from None
         return data
 
     def _get_methods_args_processor(self, endpoint: str, max_results: Optional[int] = None, page: Optional[int] = None,
@@ -259,6 +259,16 @@ class RoyaleAPIClient:
             data = self._get_methods_base("tournaments/known", key, use_cache, cache_type="dynamic", **kwargs)
         else:
             data = self._get_methods_args_processor("tournaments/known", max_results, page, **kwargs)
+        return Tournament.de_list(data, self)
+
+    def search_tournaments(self, name: str, max_results: Optional[int] = None,
+                           page: Optional[int] = None, use_cache: bool = True) -> List[Tournament]:
+        assert name, "Parameter 'name' cannot be empty"
+        if max_results is page is None:
+            key = f"ts?n={name}"
+            data = self._get_methods_base("tournaments/search", key, use_cache, cache_type="dynamic", name=name)
+        else:
+            data = self._get_methods_args_processor("tournaments/search", max_results, page, name=name)
         return Tournament.de_list(data, self)
 
     def get_version(self, use_cache: bool = True) -> str:

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Tuple, Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.models.arena import Arena
@@ -36,7 +36,7 @@ class Battle(CRObject):
         self.arena = Arena.de_json(self.arena, self.client)
 
     def datetime(self) -> datetime:
-        return datetime.utcfromtimestamp(self.utc_time).replace(tzinfo=timezone.utc)
+        return datetime.fromtimestamp(self.utc_time)
 
     def get_team(self, use_cache: bool = True) -> List[Player]:
         return self.client.get_players([p.tag for p in self.team], use_cache=use_cache)

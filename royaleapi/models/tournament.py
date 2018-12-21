@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
@@ -23,11 +23,11 @@ class Tournament(CRObject):
     end_time: Optional[int] = field(compare=False)
     duration: int = field(compare=False)
 
-    # Only from client.get_tournament()
+    # Only from tournament get and search
     description: Optional[str] = field(default=None, compare=False)
     updated_at: Optional[int] = field(default=None, compare=False)
-    creator: Optional[TournamentPlayer] = field(default=None, compare=False)
-    players: Optional[List[TournamentPlayer]] = field(default_factory=list, compare=False)
+    creator: Optional[TournamentPlayer] = field(default=None, compare=False)  # Not in tournament search
+    players: Optional[List[TournamentPlayer]] = field(default_factory=list, compare=False)  # empty if tournament search
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
@@ -36,25 +36,25 @@ class Tournament(CRObject):
         self.players = TournamentPlayer.de_list(self.players, self.client)
 
     def create_datetime(self) -> datetime:
-        return datetime.utcfromtimestamp(self.create_time).replace(tzinfo=timezone.utc)
+        return datetime.fromtimestamp(self.create_time)
 
     def start_datetime(self) -> datetime:
         if not self.start_time:
             raise ValueError("Tournament has not started")
-        return datetime.utcfromtimestamp(self.start_time).replace(tzinfo=timezone.utc)
+        return datetime.fromtimestamp(self.start_time)
 
     def end_datetime(self) -> datetime:
         if not self.end_time:
             raise ValueError("Tournament has not ended")
-        return datetime.utcfromtimestamp(self.end_time).replace(tzinfo=timezone.utc)
+        return datetime.fromtimestamp(self.end_time)
 
     def updated_at_datetime(self) -> datetime:
         if not self.updated_at:
             raise ValueError("Not a full tournament object")
-        return datetime.utcfromtimestamp(self.updated_at).replace(tzinfo=timezone.utc)
+        return datetime.fromtimestamp(self.updated_at)
 
-    def duration_in_hours(self) -> int:
-        return self.duration // 3600
+    def duration_in_hours(self) -> int or float:
+        return 0.5 if self.duration == 1800 else self.duration // 3600
 
     def get_tournament(self, use_cache: bool = True) -> "Tournament":
         return self.client.get_tournament(self.tag, use_cache=use_cache)
