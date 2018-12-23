@@ -6,12 +6,12 @@ from typing import Tuple, Generator, Iterable, Any, Optional
 from royaleapi.constants import VALID_TAG_CHARS
 from royaleapi.error import InvalidTag
 
-FIRST_CAP_REGEX = re.compile('(.)([A-Z][a-z]+)')
-ALL_CAP_REGEX = re.compile('([a-z0-9])([A-Z])')
+FIRST_CAP_REGEX = re.compile("(.)([A-Z][a-z]+)")
+ALL_CAP_REGEX = re.compile("([a-z0-9])([A-Z])")
 
 
 def camel_to_snake(string) -> str:
-    return ALL_CAP_REGEX.sub(r'\1_\2', FIRST_CAP_REGEX.sub(r'\1_\2', string)).lower()
+    return ALL_CAP_REGEX.sub(r"\1_\2", FIRST_CAP_REGEX.sub(r"\1_\2", string)).lower()
 
 
 def is_iterable(obj: Any) -> bool:

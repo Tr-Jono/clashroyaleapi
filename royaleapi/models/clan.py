@@ -28,12 +28,12 @@ class Clan(CRObject):
     # Clan endpoint only
     description: Optional[str] = field(default=None, compare=False)
     clan_type: Optional[str] = field(default=None, compare=False)
-    score: Optional[int] = field(default=None, compare=False)
+    score: Optional[int] = field(default=None, compare=False)  # Also in clan leaderboard endpoint
     war_trophies: Optional[int] = field(default=None, compare=False)  # Also in clan war endpoint
-    member_count: Optional[int] = field(default=None, compare=False)
+    member_count: Optional[int] = field(default=None, compare=False)  # Also in clan leaderboard endpoint
     required_score: Optional[int] = field(default=None, compare=False)
     total_donations: Optional[int] = field(default=None, compare=False)
-    location: Optional[Location] = field(default=None, compare=False)
+    location: Optional[Location] = field(default=None, compare=False)  # Also in clan leaderboard endpoint
     # Not returned in "clan/search" endpoint
     members: List[ClanMember] = field(default_factory=list, compare=False)
     tracking: Optional[ClanTracking] = field(default=None, compare=False)
@@ -52,6 +52,10 @@ class Clan(CRObject):
 
     # Clan war log endpoint only
     war_trophies_change: Optional[int] = field(default=None, compare=False)
+
+    # Clan leaderboard endpoint only
+    rank: Optional[int] = field(default=None, compare=False)
+    previous_rank: Optional[int] = field(default=None, compare=False)
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 

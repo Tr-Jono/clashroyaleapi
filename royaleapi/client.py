@@ -271,6 +271,47 @@ class RoyaleAPIClient:
             data = self._get_methods_args_processor("tournaments/search", max_results, page, name=name)
         return Tournament.de_list(data, self)
 
+    def get_top_players(self, location_key: str = None, max_results: Optional[int] = None,
+                        page: Optional[int] = None, use_cache: bool = True) -> List[Player]:
+        assert location_key is None or len(location_key) == 2, "Parameter 'location_key' is not valid"  # Countries only
+        endpoint = "top/players"
+        if location_key:
+            endpoint += "/" + location_key
+        if max_results is page is None:
+            key = f"tp?lk={location_key}"
+            data = self._get_methods_base(endpoint, key, use_cache, cache_type="dynamic")
+        else:
+            data = self._get_methods_args_processor(endpoint, max_results, page)
+        return Player.de_list(data, self)
+
+    def get_top_clans(self, location_key: str = None, max_results: Optional[int] = None,
+                      page: Optional[int] = None, use_cache: bool = True) -> List[Clan]:
+        assert location_key is None or location_key.isalpha() and (
+                len(location_key) == 2 or location_key.startswith("_")), "Parameter 'location_key' is not valid"
+        endpoint = "top/clans"
+        if location_key:
+            endpoint += "/" + location_key
+        if max_results is page is None:
+            key = f"tc?lk={location_key}"
+            data = self._get_methods_base(endpoint, key, use_cache, cache_type="dynamic")
+        else:
+            data = self._get_methods_args_processor(endpoint, max_results, page)
+        return Clan.de_list(data, self)
+
+    def get_top_war_clans(self, location_key: str = None, max_results: Optional[int] = None,
+                          page: Optional[int] = None, use_cache: bool = True) -> List[Clan]:
+        assert location_key is None or len(location_key) == 2 or location_key.startswith("_"), (
+            "Parameter 'location_key' is not valid")
+        endpoint = "top/war"
+        if location_key:
+            endpoint += "/" + location_key
+        if max_results is page is None:
+            key = f"tw?lk={location_key}"
+            data = self._get_methods_base(endpoint, key, use_cache, cache_type="dynamic")
+        else:
+            data = self._get_methods_args_processor(endpoint, max_results, page)
+        return Clan.de_list(data, self)
+
     def get_version(self, use_cache: bool = True) -> str:
         return self._get_methods_base("version", "v", use_cache, return_text=True)
 

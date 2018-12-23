@@ -20,14 +20,14 @@ if TYPE_CHECKING:
 class Player(CRObject):
     tag: str
     name: str = field(compare=False)
-    deck_link: str = field(compare=False)
-    deck: List[Card] = field(compare=False)
 
     # Player endpoint only
-    trophies: int = field(default=None, compare=False)
-    arena: Arena = field(default=None, compare=False)
-    rank: Optional[int] = field(default=None, compare=False)
-    clan: Optional[Clan] = field(default=None, compare=False)
+    deck_link: str = field(default=None, compare=False)  # Also in player battles endpoint
+    deck: List[Card] = field(default=None, compare=False)  # Also in player battles endpoint
+    trophies: int = field(default=None, compare=False)  # Also in player leaderboard endpoint
+    arena: Arena = field(default=None, compare=False)  # Also in player leaderboard endpoint
+    rank: Optional[int] = field(default=None, compare=False)  # Also in player leaderboard endpoint
+    clan: Optional[Clan] = field(default=None, compare=False)  # Also in player leaderboard endpoint
     stats: PlayerStats = field(default=None, compare=False)
     games: PlayerGames = field(default=None, compare=False)
     league_stats: Optional[PlayerLeagueStats] = field(default=None, compare=False)
@@ -35,9 +35,14 @@ class Player(CRObject):
     achievements: List[Achievement] = field(default=None, compare=False)
 
     # Battle participants only
-    crowns_earned: int = field(default=None, compare=False)
-    start_trophies: int = field(default=None, compare=False)
-    trophy_change: int = field(default=None, compare=False)
+    crowns_earned: Optional[int] = field(default=None, compare=False)
+    start_trophies: Optional[int] = field(default=None, compare=False)
+    trophy_change: Optional[int] = field(default=None, compare=False)
+
+    # Player leaderboard endpoint only
+    previous_rank: Optional[int] = field(default=None, compare=False)
+    level: Optional[int] = field(default=None, compare=False)
+    donations_delta: None = field(default=None, compare=False)  # Why is this here??? Always None
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
@@ -72,4 +77,6 @@ class Player(CRObject):
             data["league_stats"] = data.pop("league_statistics")
         if "current_deck" in data:
             data["deck"] = data.pop("current_deck")
+        if "exp_level" in data:
+            data["level"] = data.pop("exp_level")
         return cls(client=client, **data)
