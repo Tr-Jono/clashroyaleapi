@@ -5,7 +5,7 @@ from typing import List, Dict, Optional, Any, TYPE_CHECKING
 from royaleapi.constants import ClanWarState
 from royaleapi.models.base import CRObject
 from royaleapi.models.clan import Clan
-from royaleapi.models.clan_war_participant import ClanWarParticipant
+from royaleapi.models.player import Player
 
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
@@ -20,7 +20,7 @@ class ClanWar(CRObject):
     clan: Optional[Clan] = None
 
     # Collection day / Matchmaking / War day / War log only
-    participants: Optional[List[ClanWarParticipant]] = field(default_factory=list)
+    participants: Optional[List[Player]] = field(default_factory=list)
 
     # Collection day only
     collection_end_time: Optional[int] = None
@@ -39,7 +39,7 @@ class ClanWar(CRObject):
 
     def __post_init__(self) -> None:
         self.clan = Clan.de_json(self.clan, self.client)
-        self.participants = ClanWarParticipant.de_list(self.participants, self.client)
+        self.participants = Player.de_list(self.participants, self.client)
         self.standings = Clan.de_list(self.standings, self.client)
 
     def end_datetime(self) -> datetime:

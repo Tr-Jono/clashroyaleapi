@@ -4,7 +4,6 @@ from typing import List, Dict, Optional, Any, TYPE_CHECKING
 from royaleapi.constants import ClanBattleType
 from royaleapi.models.base import CRObject
 from royaleapi.models.clan_badge import ClanBadge
-from royaleapi.models.clan_member import ClanMember
 from royaleapi.models.clan_tracking import ClanTracking
 from royaleapi.models.location import Location
 
@@ -12,6 +11,7 @@ if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
     from royaleapi.models.battle import Battle
     from royaleapi.models.clan_war import ClanWar
+    from royaleapi.models.player import Player
 
 
 @dataclass
@@ -35,7 +35,7 @@ class Clan(CRObject):
     total_donations: Optional[int] = field(default=None, compare=False)
     location: Optional[Location] = field(default=None, compare=False)  # Also in clan leaderboard endpoint
     # Not returned in "clan/search" endpoint
-    members: List[ClanMember] = field(default_factory=list, compare=False)
+    members: List["Player"] = field(default_factory=list, compare=False)
     tracking: Optional[ClanTracking] = field(default=None, compare=False)
 
     # Player endpoint only
@@ -60,9 +60,10 @@ class Clan(CRObject):
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
+        from royaleapi.models.player import Player  # I did not want to do this
         self.badge = ClanBadge.de_json(self.badge, self.client)
         self.location = Location.de_json(self.location, self.client)
-        self.members = ClanMember.de_list(self.members, self.client)
+        self.members = Player.de_list(self.members, self.client)
         self.tracking = ClanTracking.de_json(self.tracking, self.client)
 
     def get_clan(self, use_cache: bool = True) -> "Clan":

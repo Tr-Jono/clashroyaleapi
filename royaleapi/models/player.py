@@ -22,27 +22,41 @@ class Player(CRObject):
     name: str = field(compare=False)
 
     # Player endpoint only
-    deck_link: str = field(default=None, compare=False)  # Also in player battles endpoint
-    deck: List[Card] = field(default=None, compare=False)  # Also in player battles endpoint
-    trophies: int = field(default=None, compare=False)  # Also in player leaderboard endpoint
-    arena: Arena = field(default=None, compare=False)  # Also in player leaderboard endpoint
-    rank: Optional[int] = field(default=None, compare=False)  # Also in player leaderboard endpoint
-    clan: Optional[Clan] = field(default=None, compare=False)  # Also in player leaderboard endpoint
-    stats: PlayerStats = field(default=None, compare=False)
-    games: PlayerGames = field(default=None, compare=False)
+    deck_link: Optional[str] = field(default=None, compare=False)  # Also in player battles endpoint
+    deck: Optional[List[Card]] = field(default=None, compare=False)  # Also in player battles endpoint
+    trophies: Optional[int] = field(default=None, compare=False)  # Also in clan and player leaderboard endpoint
+    arena: Optional[Arena] = field(default=None, compare=False)  # Also in clan and player leaderboard endpoint
+    rank: Optional[int] = field(default=None, compare=False)  # Also in clan, player leaderboard and tournament endpoint
+    clan: Optional[Clan] = field(default=None, compare=False)  # Also in player leaderboard and tournament endpoint
+    stats: Optional[PlayerStats] = field(default=None, compare=False)
+    games: Optional[PlayerGames] = field(default=None, compare=False)
     league_stats: Optional[PlayerLeagueStats] = field(default=None, compare=False)
-    cards: List[Card] = field(default=None, compare=False)
-    achievements: List[Achievement] = field(default=None, compare=False)
+    cards: Optional[List[Card]] = field(default=None, compare=False)
+    achievements: Optional[List[Achievement]] = field(default=None, compare=False)
+
+    # Clan endpoint only
+    level: Optional[int] = field(default=None, compare=False)  # Also in player leaderboard endpoint
+    role: Optional[str] = field(default=None, compare=False)
+    donations: Optional[int] = field(default=None, compare=False)
+    donations_received: Optional[int] = field(default=None, compare=False)
+    donations_delta: Optional[int] = field(default=None, compare=False)  # Also in player leaderboard endpoint (somehow)
+    donations_percent: Optional[float] = field(default=None, compare=False)
+    previous_rank: Optional[int] = field(default=None, compare=False)  # Also in player leaderboard endpoint
 
     # Battle participants only
     crowns_earned: Optional[int] = field(default=None, compare=False)
     start_trophies: Optional[int] = field(default=None, compare=False)
     trophy_change: Optional[int] = field(default=None, compare=False)
 
-    # Player leaderboard endpoint only
-    previous_rank: Optional[int] = field(default=None, compare=False)
-    level: Optional[int] = field(default=None, compare=False)
-    donations_delta: None = field(default=None, compare=False)  # Why is this here??? Always None
+    # Clan war endpoint only
+    cards_earned: Optional[int] = field(default=None, compare=False)
+    battles_played: Optional[int] = field(default=None, compare=False)
+    wins: Optional[int] = field(default=None, compare=False)
+    collection_day_battles_played: Optional[int] = field(default=None, compare=False)
+
+    # Tournament endpoint only
+    score: Optional[int] = field(default=None, compare=False)
+    is_creator: Optional[bool] = field(default=None, compare=False)
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
@@ -79,4 +93,6 @@ class Player(CRObject):
             data["deck"] = data.pop("current_deck")
         if "exp_level" in data:
             data["level"] = data.pop("exp_level")
+        if "creator" in data:
+            data["is_creator"] = data.pop("creator")
         return cls(client=client, **data)

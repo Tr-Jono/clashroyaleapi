@@ -20,7 +20,8 @@ class PlayerStats(CRObject):
     challenge_max_wins: int
     challenge_cards_won: int
     level: int
-    client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
+
+    client: Optional["RoyaleAPIClient"] = field(default=None, repr=False)
 
     def __post_init__(self):
         self.favorite_card = Card.de_json(self.favorite_card, self.client)

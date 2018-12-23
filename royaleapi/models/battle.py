@@ -27,6 +27,7 @@ class Battle(CRObject):
     opponent: List[Player]
     arena: Arena = field(compare=False)
     tournament_tag: Optional[int] = field(default=None, compare=False)
+
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
