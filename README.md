@@ -29,7 +29,7 @@ Follow [these instructions](https://docs.royaleapi.com/#/authentication?id=gener
 to obtain your developer key.
 
 ## Currently Supported Methods
-Methods with an alias indicate that multiple tags can be passed to it.
+Methods with an alias indicate that multiple tags can be passed to them.
 ```python
 client.get_player()          # alias: client.get_players()
 client.get_player_chests()   # alias: client.get_players_chests()

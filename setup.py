@@ -7,7 +7,7 @@ setup(
     name="clashroyaleapi",
     python_requies=">=3.6",
     version="0.2.0",
-    description="A Python wrapper for RoyaleAPI.",
+    description="A sync Python 3.6+ wrapper for RoyaleAPI.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[

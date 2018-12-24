@@ -28,6 +28,11 @@ class Card(CRObject):
     min_level: Optional[int] = field(default=None, compare=False)
     icon: Optional[str] = field(default=None, compare=False)
 
+    def new_level(self):
+        if not self.level:
+            raise ValueError("Card is not from player object")
+        return self.level + self.min_level - 1
+
     @classmethod
     def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Card"]:
         if not data:
