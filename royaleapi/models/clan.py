@@ -83,8 +83,8 @@ class Clan(CRObject):
     def get_tracking(self, *args, **kwargs) -> ClanTracking:
         return self.client.get_clan_tracking(self.tag, *args, **kwargs)
 
-    def track(self) -> bool:
-        return self.client.track_clan(self.tag)
+    def track(self, *args, **kwargs) -> bool:
+        return self.client.track_clan(self.tag, *args, **kwargs)
 
     @classmethod
     def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Clan"]:

@@ -12,6 +12,10 @@ class InvalidTag(RoyaleAPIError):
         super().__init__("Invalid Clash Royale tag")
 
 
+class RequestTimeout(RoyaleAPIError):
+    pass
+
+
 class ServerResponseInvalid(RoyaleAPIError):
     pass
 
