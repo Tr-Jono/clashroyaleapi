@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any, TYPE_CHECKING
 
-from royaleapi.constants import ClanBattleType
 from royaleapi.models.base import CRObject
 from royaleapi.models.clan_badge import ClanBadge
 from royaleapi.models.clan_tracking import ClanTracking
@@ -66,23 +65,23 @@ class Clan(CRObject):
         self.members = Player.de_list(self.members, self.client)
         self.tracking = ClanTracking.de_json(self.tracking, self.client)
 
-    def get_clan(self, use_cache: bool = True) -> "Clan":
-        return self.client.get_clan(self.tag, use_cache=use_cache)
+    def get_clan(self, *args, **kwargs) -> "Clan":
+        return self.client.get_clan(self.tag, *args, **kwargs)
 
-    def get_battles(self, battle_type: str = ClanBattleType.CLANMATE,
-                    max_results: Optional[int] = None, page: Optional[int] = None,
-                    use_cache: bool = True) -> List["Battle"]:
-        return self.client.get_clan_battles(self.tag, battle_type, max_results, page, use_cache)
+    def get_members(self, *args, **kwargs) -> List["Player"]:
+        return self.client.get_players([p.tag for p in self.members], *args, **kwargs)
 
-    def get_war(self, use_cache: bool = True) -> "ClanWar":
-        return self.client.get_clan_war(self.tag, use_cache)
+    def get_battles(self, *args, **kwargs) -> List["Battle"]:
+        return self.client.get_clan_battles(self.tag, *args, **kwargs)
 
-    def get_war_log(self, max_results: Optional[int] = None, page: Optional[int] = None,
-                    use_cache: bool = True) -> List["ClanWar"]:
-        return self.client.get_clan_war_log(self.tag, max_results, page, use_cache)
+    def get_war(self, *args, **kwargs) -> "ClanWar":
+        return self.client.get_clan_war(self.tag, *args, **kwargs)
 
-    def get_tracking(self, use_cache: bool = True) -> ClanTracking or List[ClanTracking]:
-        return self.client.get_clan_tracking(self.tag, use_cache=use_cache)
+    def get_war_log(self, *args, **kwargs) -> List["ClanWar"]:
+        return self.client.get_clan_war_log(self.tag, *args, **kwargs)
+
+    def get_tracking(self, *args, **kwargs) -> ClanTracking:
+        return self.client.get_clan_tracking(self.tag, *args, **kwargs)
 
     def track(self) -> bool:
         return self.client.track_clan(self.tag)

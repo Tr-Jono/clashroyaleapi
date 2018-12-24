@@ -59,7 +59,7 @@ class RoyaleAPIClient:
                 tags = [validate_tag(tags)]
                 given_single_tag = True
         elif is_iterable(tags):
-            tags = [validate_tag(tag) for tag in (*tags, *args)] if args else [validate_tag(tag) for tag in tags]
+            tags = [validate_tag(tag) for tag in (*tags, *args)]
         else:
             raise ValueError("Given argument(s) is/are not a tag nor iterables of them")
         return tags, given_single_tag

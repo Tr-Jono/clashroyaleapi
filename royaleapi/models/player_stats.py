@@ -23,7 +23,7 @@ class PlayerStats(CRObject):
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.favorite_card = Card.de_json(self.favorite_card, self.client)
 
     @classmethod

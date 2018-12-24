@@ -35,29 +35,29 @@ class Tournament(CRObject):
         self.creator = Player.de_json(self.creator, self.client)
         self.players = Player.de_list(self.players, self.client)
 
-    def create_datetime(self) -> datetime:
-        return datetime.fromtimestamp(self.create_time)
+    def create_datetime(self, *args, **kwargs) -> datetime:
+        return datetime.fromtimestamp(self.create_time, *args, **kwargs)
 
-    def start_datetime(self) -> datetime:
+    def start_datetime(self, *args, **kwargs) -> datetime:
         if not self.start_time:
             raise ValueError("Tournament has not started")
-        return datetime.fromtimestamp(self.start_time)
+        return datetime.fromtimestamp(self.start_time, *args, **kwargs)
 
-    def end_datetime(self) -> datetime:
+    def end_datetime(self, *args, **kwargs) -> datetime:
         if not self.end_time:
             raise ValueError("Tournament has not ended")
-        return datetime.fromtimestamp(self.end_time)
+        return datetime.fromtimestamp(self.end_time, *args, **kwargs)
 
-    def updated_at_datetime(self) -> datetime:
+    def updated_at_datetime(self, *args, **kwargs) -> datetime:
         if not self.updated_at:
             raise ValueError("Not a full tournament object")
-        return datetime.fromtimestamp(self.updated_at)
+        return datetime.fromtimestamp(self.updated_at, *args, **kwargs)
 
     def duration_in_hours(self) -> int or float:
         return 0.5 if self.duration == 1800 else self.duration // 3600
 
-    def get_tournament(self, use_cache: bool = True) -> "Tournament":
-        return self.client.get_tournament(self.tag, use_cache=use_cache)
+    def get_tournament(self, *args, **kwargs) -> "Tournament":
+        return self.client.get_tournament(self.tag, *args, **kwargs)
 
     @classmethod
     def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Tournament"]:

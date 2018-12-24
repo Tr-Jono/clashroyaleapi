@@ -70,17 +70,14 @@ class Player(CRObject):
         self.cards = Card.de_list(self.cards, self.client)
         self.achievements = Achievement.de_list(self.achievements, self.client)
 
-    def get_player(self, use_cache: bool = True) -> "Player":
-        return self.client.get_player(self.tag, use_cache=use_cache)
+    def get_player(self, *args, **kwargs) -> "Player":
+        return self.client.get_player(self.tag, *args, **kwargs)
 
-    def get_clan(self, use_cache: bool = True) -> Optional[Clan]:
-        return self.clan.get_clan(use_cache=use_cache) if self.clan else None
+    def get_chests(self, *args, **kwargs) -> ChestCycle:
+        return self.client.get_player_chests(self.tag, *args, **kwargs)
 
-    def get_chests(self, use_cache: bool = True) -> ChestCycle:
-        return self.client.get_player_chests(self.tag, use_cache=use_cache)
-
-    def get_battles(self, use_cache: bool = True) -> List["Battle"]:
-        return self.client.get_player_battles(self.tag, use_cache=use_cache)
+    def get_battles(self, *args, **kwargs) -> List["Battle"]:
+        return self.client.get_player_battles(self.tag, *args, **kwargs)
 
     @classmethod
     def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Player"]:

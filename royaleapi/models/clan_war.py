@@ -42,10 +42,20 @@ class ClanWar(CRObject):
         self.participants = Player.de_list(self.participants, self.client)
         self.standings = Clan.de_list(self.standings, self.client)
 
-    def end_datetime(self) -> datetime:
+    def end_datetime(self, *args, **kwargs) -> datetime:
         if self.state == ClanWarState.NOT_IN_WAR:
             raise ValueError("No ongoing war")
-        return datetime.fromtimestamp(self.collection_end_time or self.war_end_time or self.end_time)
+        return datetime.fromtimestamp(self.collection_end_time or self.war_end_time or self.end_time, *args, **kwargs)
+
+    def get_clan_participants(self, *args, **kwargs) -> List[Player]:
+        if not self.participants:
+            raise ValueError("No ongoing war")
+        return self.client.get_players([p.tag for p in self.participants], *args, **kwargs)
+
+    def get_participating_clans(self, *args, **kwargs) -> List[Clan]:
+        if not self.standings:
+            raise ValueError("Clan not in war day")
+        return self.client.get_clans([c.tag for c in self.standings], *args, **kwargs)
 
     def get_clan_total_cards_earned(self) -> int:
         return sum(p.cards_earned for p in self.participants)

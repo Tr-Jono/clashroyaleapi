@@ -36,17 +36,17 @@ class Battle(CRObject):
         self.opponent = Player.de_list(self.opponent, self.client)
         self.arena = Arena.de_json(self.arena, self.client)
 
-    def datetime(self) -> datetime:
-        return datetime.fromtimestamp(self.utc_time)
+    def datetime(self, *args, **kwargs) -> datetime:
+        return datetime.fromtimestamp(self.utc_time, *args, **kwargs)
 
-    def get_team(self, use_cache: bool = True) -> List[Player]:
-        return self.client.get_players([p.tag for p in self.team], use_cache=use_cache)
+    def get_team(self, *args, **kwargs) -> List[Player]:
+        return self.client.get_players([p.tag for p in self.team], *args, **kwargs)
 
-    def get_opponents(self, use_cache: bool = True) -> List[Player]:
-        return self.client.get_players([p.tag for p in self.opponent], use_cache=use_cache)
+    def get_opponents(self, *args, **kwargs) -> List[Player]:
+        return self.client.get_players([p.tag for p in self.opponent], *args, **kwargs)
 
-    def get_players(self, use_cache: bool = True) -> Tuple[List[Player], List[Player]]:
-        players = self.client.get_players([p.tag for p in self.team + self.opponent], use_cache=use_cache)
+    def get_players(self, *args, **kwargs) -> Tuple[List[Player], List[Player]]:
+        players = self.client.get_players([p.tag for p in self.team + self.opponent], *args, **kwargs)
         return ([players[0]], [players[1]]) if self.team_size == 1 else ([players[:2]], [players[2:]])
 
     @classmethod
