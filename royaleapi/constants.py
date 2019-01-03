@@ -1,6 +1,16 @@
 VALID_TAG_CHARS = "0289CGJLPQRUVY"
 
 
+class Chests:
+    SILVER = "silver"
+    GOLD = "gold"
+    GIANT = "giant"
+    MAGICAL = "magical"
+    EPIC = "epic"
+    LEGENDARY = "legendary"
+    MEGA_LIGHTNING = "megaLightning"
+
+
 class CardType:
     TROOP = "Troop"
     SPELL = "Spell"

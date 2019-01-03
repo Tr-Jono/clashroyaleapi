@@ -21,17 +21,12 @@ class Card(CRObject):
     # Players' cards only
     level: Optional[int] = field(default=None, compare=False)
     star_level: Optional[int] = field(default=None, compare=False)  # Not given if star_level is 0
-    max_level: Optional[int] = field(default=None, compare=False)
+    max_level: Optional[int] = field(default=None, compare=False)  # Always 13
     count: Optional[int] = field(default=None, compare=False)
     required_for_upgrade: Optional[int or str] = field(default=None, compare=False)  # str can only be "Maxed"
     left_to_upgrade: Optional[int] = field(default=None, compare=False)
-    min_level: Optional[int] = field(default=None, compare=False)
+    min_level: Optional[int] = field(default=None, compare=False)  # 1/3/6/9
     icon: Optional[str] = field(default=None, compare=False)
-
-    def new_level(self):
-        if not self.level:
-            raise ValueError("Card is not from player object")
-        return self.level + self.min_level - 1
 
     @classmethod
     def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Card"]:

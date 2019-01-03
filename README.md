@@ -1,4 +1,4 @@
-# clashroyaleapi v0.2.0
+# clashroyaleapi v0.2.1
 
 A sync __Python 3.6+__ wrapper for [RoyaleAPI](https://royaleapi.com/). (WIP)
 
@@ -12,17 +12,15 @@ You are recommended to read [RoyaleAPI's documentation](https://docs.royaleapi.c
 as the documentation for this wrapper is to be written. You may also reference the
 [short examples](https://github.com/Tr-Jono/clashroyaleapi#short-examples-of-using-the-wrapper) below.
 
-__This content is not affiliated with, endorsed, sponsored,
+_This content is not affiliated with, endorsed, sponsored,
 or specifically approved by Supercell and Supercell is not responsible for it.
-For more information see [Supercell’s Fan Content Policy](http://supercell.com/en/fan-content-policy/).__
+For more information see [Supercell’s Fan Content Policy](http://supercell.com/en/fan-content-policy/)._
 
 ## Installation
-The project is on [PyPI](https://pypi.org/project/clashroyaleapi/).
+This project is on [PyPI](https://pypi.org/project/clashroyaleapi/).
 ```
 pip install clashroyaleapi
 ```
-This wrapper requires [requests](http://docs.python-requests.org/en/master/) and
-the [dataclasses backport](https://github.com/ericvsmith/dataclasses) (Python 3.6 only).
 
 ## Obtaining Developer Key
 Follow [these instructions](https://docs.royaleapi.com/#/authentication?id=generating-new-keys)

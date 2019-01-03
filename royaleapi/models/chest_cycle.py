@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 @dataclass(eq=False)
 class ChestCycle(CRObject):
     upcoming: List[str]
-    super_magical: int
+    mega_lightning: int
     magical: int
     legendary: int
     epic: int
