@@ -1,7 +1,7 @@
 VALID_TAG_CHARS = "0289CGJLPQRUVY"
 
 
-class Chests:
+class Chest:
     SILVER = "silver"
     GOLD = "gold"
     GIANT = "giant"

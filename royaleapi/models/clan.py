@@ -47,7 +47,7 @@ class Clan(CRObject):
     participants: Optional[int] = field(default=None, compare=False)
     battles_played: Optional[int] = field(default=None, compare=False)
     wins: Optional[int] = field(default=None, compare=False)
-    crowns: Optional[int] = field(default=None, compare=False)
+    crowns: Optional[int] = field(default=None, compare=False)  # War day only
 
     # Clan war log endpoint only
     war_trophies_change: Optional[int] = field(default=None, compare=False)

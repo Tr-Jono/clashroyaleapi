@@ -19,13 +19,14 @@ class Card(CRObject):
     card_id: int = field(compare=False)
 
     # Players' cards only
-    level: Optional[int] = field(default=None, compare=False)
-    star_level: Optional[int] = field(default=None, compare=False)  # Not given if star_level is 0
-    max_level: Optional[int] = field(default=None, compare=False)  # Always 13
+    level: Optional[int] = field(default=None, compare=False)  # 1 - 5/8/11/13 (old levels)
+    display_level: Optional[int] = field(default=None, compare=False)  # 1/3/6/9 - 13 (new levels)
+    star_level: Optional[int] = field(default=None, compare=False)  # None if star_level is 0
+    min_level: Optional[int] = field(default=None, compare=False)  # 1/3/6/9 (old levels)
+    max_level: Optional[int] = field(default=None, compare=False)  # 5/8/11/13 (new levels)
     count: Optional[int] = field(default=None, compare=False)
-    required_for_upgrade: Optional[int or str] = field(default=None, compare=False)  # str can only be "Maxed"
+    required_for_upgrade: Optional[int or str] = field(default=None, compare=False)  # int or "Maxed"
     left_to_upgrade: Optional[int] = field(default=None, compare=False)
-    min_level: Optional[int] = field(default=None, compare=False)  # 1/3/6/9
     icon: Optional[str] = field(default=None, compare=False)
 
     @classmethod

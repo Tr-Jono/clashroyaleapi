@@ -48,7 +48,7 @@ class Player(CRObject):
     start_trophies: Optional[int] = field(default=None, compare=False)
     trophy_change: Optional[int] = field(default=None, compare=False)
 
-    # Clan war endpoint only
+    # Clan war (log) endpoint only
     cards_earned: Optional[int] = field(default=None, compare=False)
     battles_played: Optional[int] = field(default=None, compare=False)
     wins: Optional[int] = field(default=None, compare=False)
