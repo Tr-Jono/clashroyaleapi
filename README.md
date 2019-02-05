@@ -1,9 +1,5 @@
 # clashroyaleapi v0.2.2
 
-*Note: The API is having issues with pagination,
-which corresponds to the parameters `max_results` and `page` in the client methods.
-You are not recommended to use them (they would not work regardless), especially if you set the client to cache data.*
-
 A sync __Python 3.6+__ wrapper for [RoyaleAPI](https://royaleapi.com/). (WIP)
 
 This wrapper's code style is inspired by
@@ -40,6 +36,7 @@ client.get_clan()            # alias: client.get_clans()
 client.get_clan_battles()
 client.get_clan_war()
 client.get_clan_war_log()
+client.get_clan_history()
 client.get_clan_tracking()   # alias: client.get_clans_tracking()
 client.track_clan()          # alias: client.track_clans()
 client.search_clans()
@@ -49,6 +46,7 @@ client.search_tournaments()
 client.get_top_players()
 client.get_top_clans()
 client.get_top_war_clans()
+client.get_popular_players()
 client.get_version()
 client.get_health()
 client.get_status()
@@ -85,7 +83,7 @@ with royaleapi.RoyaleAPIClient("YOUR_DEVELOPER_KEY") as client:
 # False, True
 # [('新香港部落123', '花果山劉德華', 5073), ('香港部落·二部', 'Gnuelnam', 4479)]
 ```
-(2nd clan does not exist anymore, you will get an error trying this.)
+(One clan has been deleted, you will get an error trying this. Example will be updated later.)
 
 ### Example 2: Using cached data
 ```python
@@ -112,10 +110,9 @@ print(t2 - t1, t3 - t2, t4 - t3, p1 == p2 == p3, sep=", ")
 ```
 
 ## Unfinished endpoints
-- `/tournament/global`
-- `/popular/clan`
-- `/popular/player`
+-  `/popular/clan`
 - `/popular/tournament`
 - `/popular/deck`
+- `/tournament/global` (waiting for next global tournament)
 - `/constants` (figuring out how to implement)
 - `/clan/:tag/history/weekly` (not working, API issue)

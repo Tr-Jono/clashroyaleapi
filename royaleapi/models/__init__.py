@@ -15,9 +15,10 @@ from .player_games import PlayerGames
 from .player_league_season import PlayerLeagueSeason
 from .player_league_stats import PlayerLeagueStats
 from .player_stats import PlayerStats
+from .popularity import Popularity
 from .server_status import ServerStatus
 from .tournament import Tournament
 
-__all__ = ["Achievement", "Arena", "Battle", "BattleMode", "CRObject", "Card", "ChestCycle",
-           "Clan", "ClanBadge", "ClanTracking", "ClanWar", "Location", "Player", "PlayerGames",
-           "PlayerLeagueSeason", "PlayerLeagueStats", "PlayerStats", "ServerStatus", "Tournament"]
+__all__ = ["Achievement", "Arena", "Battle", "BattleMode", "CRObject", "Card", "ChestCycle", "Clan", "ClanBadge",
+           "ClanTracking", "ClanWar", "Location", "Player", "PlayerGames", "PlayerLeagueSeason", "PlayerLeagueStats",
+           "PlayerStats", "Popularity", "ServerStatus", "Tournament"]

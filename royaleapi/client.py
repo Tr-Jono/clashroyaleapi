@@ -105,28 +105,14 @@ class RoyaleAPIClient:
             raise RoyaleAPIError(message) from None
         return data
 
-    def _get_methods_args_processor(self, endpoint: str, max_results: Optional[int] = None,
-                                    page: Optional[int] = None, return_text: bool = False,
-                                    timeout: Optional[int] = None, **kwargs) -> Dict or List[Dict]:
-        assert max_results is None or max_results > 0, "Parameter 'max_results' must be > 0 if given"
-        assert page is None or page >= 0, "Parameter 'page' must be >= 0 if given"
-        if page is not None:
-            assert max_results is not None, "Parameter 'max_results' must be provided if parameter 'page' is given"
-        kwargs.update({"max": max_results, "page": page})
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-        return self._request(endpoint, params=kwargs, return_text=return_text, timeout=timeout)
-
-    def _get_methods_base(self, endpoint: str, key: str, use_cache: bool, cache_type: str = "server_info",
+    def _get_methods_base(self, endpoint: str, key: str, use_cache: bool, cache_type: str = "dynamic",
                           return_text: bool = False, timeout: Optional[int] = None, **kwargs) -> Dict or List[Dict]:
         try:
             assert self._cache and use_cache and self._cache[cache_type] is not None
             self._purge_cache(cache_type)
             data = self._fetch_from_cache(key, cache_type)
         except (AssertionError, KeyError):
-            if kwargs:
-                data = self._get_methods_args_processor(endpoint, return_text=return_text, timeout=timeout, **kwargs)
-            else:
-                data = self._request(endpoint, return_text=return_text, timeout=timeout)
+            data = self._request(endpoint, params=kwargs, return_text=return_text, timeout=timeout)
             if self._cache and self._cache[cache_type] is not None:
                 self._save_in_cache(key, data, cache_type)
         return data
@@ -142,10 +128,7 @@ class RoyaleAPIClient:
                 data = data[0]
         except (AssertionError, KeyError):
             endpoint = endpoint.format(",".join(tags))
-            if kwargs:
-                data = self._get_methods_args_processor(endpoint, timeout=timeout, **kwargs)
-            else:
-                data = self._request(endpoint, timeout=timeout)
+            data = self._request(endpoint, params=kwargs, timeout=timeout)
             if self._cache and self._cache[cache_type] is not None:
                 self._save_in_cache(keys, data, cache_type)
         return data
@@ -170,13 +153,13 @@ class RoyaleAPIClient:
         keys = [f"pb{tag}" for tag in tags]
         if self._cache and self._cache["dynamic"]:
             self._purge_cache()
-        # Different methods since all battles of diff players are merged into same list if multiple players are provided
+        # Different as all battles of diff players are merged into same list if multiple players are provided
         if len(tags) == 1:
             data = self._get_methods_with_tags_base("player/{}/battle", tags, keys, use_cache, timeout=timeout)
         elif self._cache and self._cache["dynamic"] is not None and all(k in self._cache["dynamic"] for k in keys):
             data = list(chain(*self._fetch_from_cache(keys)))
         else:
-            data = self._get_methods_args_processor(f"player/{','.join(tags)}/battle", timeout=timeout)
+            data = self._request(f"player/{','.join(tags)}/battle", timeout=timeout)
         return Battle.de_list(data, self)
 
     def get_clan(self, clan_tags: str or List[str], *args: str, use_cache: bool = True,
@@ -186,19 +169,14 @@ class RoyaleAPIClient:
         data = self._get_methods_with_tags_base("clan/{}", tags, keys, use_cache, timeout=timeout)
         return Clan.de_json(data, self) if given_single_tag else Clan.de_list(data, self)
 
-    def get_clan_battles(self, clan_tag: str, battle_type: str = ClanBattleType.CLANMATE,
-                         max_results: Optional[int] = None, page: Optional[int] = None,
-                         use_cache: bool = True, timeout: Optional[int] = None) -> List[Battle]:
+    def get_clan_battles(self, clan_tag: str, battle_type: str = ClanBattleType.CLANMATE, use_cache: bool = True,
+                         timeout: Optional[int] = None) -> List[Battle]:
         if battle_type not in (ClanBattleType.ALL, ClanBattleType.CLANMATE, ClanBattleType.WAR):
             raise ValueError("Invalid battle type")
         tag = validate_tag(clan_tag)
-        if max_results is page is None:
-            key = f"cb{battle_type[0].lower()}{tag}"
-            data = self._get_methods_with_tags_base("clan/{}/battle", [tag], [key], use_cache,
-                                                    timeout=timeout, type=battle_type)
-        else:
-            data = self._get_methods_args_processor(f"clan/{tag}/battle", max_results, page,
-                                                    timeout=timeout, type=battle_type)
+        key = f"cb{battle_type[0].lower()}{tag}"
+        data = self._get_methods_with_tags_base("clan/{}/battle", [tag], [key], use_cache,
+                                                timeout=timeout, type=battle_type)
         return Battle.de_list(data, self)
 
     def get_clan_war(self, clan_tag: str, use_cache: bool = True, timeout: Optional[int] = None) -> ClanWar:
@@ -207,14 +185,10 @@ class RoyaleAPIClient:
         data = self._get_methods_with_tags_base("clan/{}/war", [tag], [key], use_cache, timeout=timeout)
         return ClanWar.de_json(data, self)
 
-    def get_clan_war_log(self, clan_tag: str, max_results: Optional[int] = None, page: Optional[int] = None,
-                         use_cache: bool = True, timeout: Optional[int] = None) -> List[ClanWar]:
+    def get_clan_war_log(self, clan_tag: str, use_cache: bool = True, timeout: Optional[int] = None) -> List[ClanWar]:
         tag = validate_tag(clan_tag)
         key = f"cwl{tag}"
-        if max_results is page is None:
-            data = self._get_methods_with_tags_base("clan/{}/warlog", [tag], [key], use_cache, timeout=timeout)
-        else:
-            data = self._get_methods_args_processor(f"clan/{tag}/warlog", max_results, page, timeout=timeout)
+        data = self._get_methods_with_tags_base("clan/{}/warlog", [tag], [key], use_cache, timeout=timeout)
         return ClanWar.de_list(data, self)
 
     def get_clan_history(self, clan_tag: str, use_cache: bool = True, timeout: Optional[int] = None) -> Dict[str, Clan]:
@@ -237,8 +211,8 @@ class RoyaleAPIClient:
 
     def search_clans(self, name: Optional[str] = None, min_score: Optional[int] = None,
                      min_members: Optional[int] = None, max_members: Optional[int] = None,
-                     location_id: Optional[int] = None, max_results: Optional[int] = None,
-                     page: Optional[int] = None, use_cache: bool = True, timeout: Optional[int] = None) -> List[Clan]:
+                     location_id: Optional[int] = None, use_cache: bool = True,
+                     timeout: Optional[int] = None) -> List[Clan]:
         assert name is None or len(name) >= 3, "The length of parameter 'name' must be >= 3 if given"
         assert min_score is None or min_score >= 0, "Parameter 'score' must be a non-negative integer if given"
         assert min_members is None or 2 <= min_members <= 50, "2 <= parameter 'min_members' <= 50 must be True if given"
@@ -250,12 +224,8 @@ class RoyaleAPIClient:
             "At least one search parameter is required")
         kwargs = {"name": name, "score": min_score, "minMembers": min_members,
                   "maxMembers": max_members, "locationId": location_id}
-        if max_results is page is None:
-            key = f"cs?n={name}&ms={min_score}&mim={min_members}&mam={max_members}&li={location_id}"
-            data = self._get_methods_base("clan/search", key, use_cache,
-                                          cache_type="dynamic", timeout=timeout, **kwargs)
-        else:
-            data = self._get_methods_args_processor("clan/search", max_results, page, timeout=timeout, **kwargs)
+        key = f"cs?n={name}&ms={min_score}&mim={min_members}&mam={max_members}&li={location_id}"
+        data = self._get_methods_base("clan/search", key, use_cache, timeout=timeout, **kwargs)
         return Clan.de_list(data, self)
 
     def get_tournament(self, tournament_tags: str or List[str], *args: str, use_cache: bool = True,
@@ -266,82 +236,72 @@ class RoyaleAPIClient:
         return Tournament.de_json(data, self) if given_single_tag else Tournament.de_list(data, self)
 
     def get_known_tournaments(self, filter_1k: bool = False, filter_open: bool = False, filter_full: bool = False,
-                              filter_in_prep: bool = False, filter_joinable: bool = False,
-                              max_results: Optional[int] = None, page: Optional[int] = None, use_cache: bool = True,
+                              filter_in_prep: bool = False, filter_joinable: bool = False, use_cache: bool = True,
                               timeout: Optional[int] = None) -> List[Tournament]:
-        filter_1k = int(filter_1k)
-        filter_open = int(filter_open)
-        filter_full = int(filter_full)
-        filter_in_prep = int(filter_in_prep)
-        filter_joinable = int(filter_joinable)
-        kwargs = {"1k": filter_1k, "open": filter_open, "full": filter_full,
-                  "inprep": filter_in_prep, "joinable": filter_joinable}
-        if max_results is page is None:
-            key = f"tk?1k={filter_1k}&o={filter_open}&f={filter_full}&p={filter_in_prep}&j={filter_joinable}"
-            data = self._get_methods_base("tournament/known", key, use_cache, "dynamic", timeout=timeout, **kwargs)
-        else:
-            data = self._get_methods_args_processor("tournament/known", max_results, page, timeout=timeout, **kwargs)
+        kwargs = {
+            "1k": int(filter_1k),
+            "open": int(filter_open),
+            "full": int(filter_full),
+            "inprep": int(filter_in_prep),
+            "joinable": int(filter_joinable)
+        }
+        key = f"tk?1k={filter_1k}&o={filter_open}&f={filter_full}&p={filter_in_prep}&j={filter_joinable}"
+        data = self._get_methods_base("tournament/known", key, use_cache, timeout=timeout, **kwargs)
         return Tournament.de_list(data, self)
 
-    def search_tournaments(self, name: str, max_results: Optional[int] = None, page: Optional[int] = None,
-                           use_cache: bool = True, timeout: Optional[int] = None) -> List[Tournament]:
+    def search_tournaments(self, name: str, use_cache: bool = True, timeout: Optional[int] = None) -> List[Tournament]:
         assert name, "Parameter 'name' cannot be empty"
-        if max_results is page is None:
-            key = f"ts?n={name}"
-            data = self._get_methods_base("tournament/search", key, use_cache, "dynamic", timeout=timeout, name=name)
-        else:
-            data = self._get_methods_args_processor("tournament/search", max_results, page, timeout=timeout, name=name)
+        key = f"ts?n={name}"
+        data = self._get_methods_base("tournament/search", key, use_cache, timeout=timeout, name=name)
         return Tournament.de_list(data, self)
 
-    def get_top_players(self, location_key: str = None, max_results: Optional[int] = None, page: Optional[int] = None,
-                        use_cache: bool = True, timeout: Optional[int] = None) -> List[Player]:
+    def get_top_players(self, location_key: str = None, use_cache: bool = True,
+                        timeout: Optional[int] = None) -> List[Player]:
         assert location_key is None or len(location_key) == 2, "Parameter 'location_key' is not valid"  # Countries only
-        endpoint = "top/players"
+        endpoint = "top/player"
         if location_key:
             endpoint += "/" + location_key
-        if max_results is page is None:
-            key = f"tp?lk={location_key}"
-            data = self._get_methods_base(endpoint, key, use_cache, "dynamic", timeout=timeout)
-        else:
-            data = self._get_methods_args_processor(endpoint, max_results, page, timeout=timeout)
+        key = f"tp?lk={location_key}"
+        data = self._get_methods_base(endpoint, key, use_cache, timeout=timeout)
         return Player.de_list(data, self)
 
-    def get_top_clans(self, location_key: str = None, max_results: Optional[int] = None, page: Optional[int] = None,
-                      use_cache: bool = True, timeout: Optional[int] = None) -> List[Clan]:
-        assert location_key is None or location_key.isalpha() and (
+    def get_top_clans(self, location_key: str = None, use_cache: bool = True,
+                      timeout: Optional[int] = None) -> List[Clan]:
+        assert (location_key is None or location_key.isalpha() and
                 len(location_key) == 2 or location_key.startswith("_")), "Parameter 'location_key' is not valid"
-        endpoint = "top/clans"
+        endpoint = "top/clan"
         if location_key:
             endpoint += "/" + location_key
-        if max_results is page is None:
-            key = f"tc?lk={location_key}"
-            data = self._get_methods_base(endpoint, key, use_cache, "dynamic", timeout=timeout)
-        else:
-            data = self._get_methods_args_processor(endpoint, max_results, page, timeout=timeout)
+        key = f"tc?lk={location_key}"
+        data = self._get_methods_base(endpoint, key, use_cache, timeout=timeout)
         return Clan.de_list(data, self)
 
-    def get_top_war_clans(self, location_key: str = None, max_results: Optional[int] = None, page: Optional[int] = None,
-                          use_cache: bool = True, timeout: Optional[int] = None) -> List[Clan]:
+    def get_top_war_clans(self, location_key: str = None, use_cache: bool = True,
+                          timeout: Optional[int] = None) -> List[Clan]:
         assert location_key is None or len(location_key) == 2 or location_key.startswith("_"), (
             "Parameter 'location_key' is not valid")
         endpoint = "top/war"
         if location_key:
             endpoint += "/" + location_key
-        if max_results is page is None:
-            key = f"tw?lk={location_key}"
-            data = self._get_methods_base(endpoint, key, use_cache, "dynamic", timeout=timeout)
-        else:
-            data = self._get_methods_args_processor(endpoint, max_results, page, timeout=timeout)
+        key = f"tw?lk={location_key}"
+        data = self._get_methods_base(endpoint, key, use_cache, timeout=timeout)
         return Clan.de_list(data, self)
 
+    def get_popular_players(self, use_cache: bool = True, timeout: Optional[int] = None) -> List[Player]:
+        key = "pp"
+        data = self._get_methods_base("popular/player", key, use_cache, timeout=timeout)
+        return Player.de_list(data, self)
+
     def get_version(self, use_cache: bool = True, timeout: Optional[int] = None) -> str:
-        return self._get_methods_base("version", "v", use_cache, return_text=True, timeout=timeout)
+        return self._get_methods_base("version", "v", use_cache, cache_type="server_info",
+                                      return_text=True, timeout=timeout)
 
     def get_health(self, use_cache: bool = True, timeout: Optional[int] = None) -> str:
-        return self._get_methods_base("health", "h", use_cache, return_text=True, timeout=timeout)
+        return self._get_methods_base("health", "h", use_cache, cache_type="server_info",
+                                      return_text=True, timeout=timeout)
 
     def get_status(self, use_cache: bool = True, timeout: Optional[int] = None) -> ServerStatus:
-        data = self._get_methods_base("status", "s", use_cache, timeout=timeout)
+        data = self._get_methods_base("status", "s", use_cache, cache_type="server_info", timeout=timeout)
         return ServerStatus.de_json(data, self)
 
     def get_endpoints(self, use_cache: bool = True, timeout: Optional[int] = None) -> List[str]:

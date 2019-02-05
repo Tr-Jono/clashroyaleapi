@@ -10,6 +10,7 @@ from royaleapi.models.clan import Clan
 from royaleapi.models.player_games import PlayerGames
 from royaleapi.models.player_league_stats import PlayerLeagueStats
 from royaleapi.models.player_stats import PlayerStats
+from royaleapi.models.popularity import Popularity
 
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
@@ -21,9 +22,9 @@ class Player(CRObject):
     tag: str
     name: str = field(compare=False)
 
-    # Player endpoint only
-    deck_link: Optional[str] = field(default=None, compare=False)  # Also in player battles endpoint
+    # Player and popularity endpoint only
     deck: Optional[List[Card]] = field(default=None, compare=False)  # Also in player battles endpoint
+    deck_link: Optional[str] = field(default=None, compare=False)  # Also in player battles endpoint
     trophies: Optional[int] = field(default=None, compare=False)  # Also in clan and player leaderboard endpoint
     arena: Optional[Arena] = field(default=None, compare=False)  # Also in clan and player leaderboard endpoint
     rank: Optional[int] = field(default=None, compare=False)  # Also in clan, player leaderboard and tournament endpoint
@@ -59,6 +60,9 @@ class Player(CRObject):
     score: Optional[int] = field(default=None, compare=False)
     is_creator: Optional[bool] = field(default=None, compare=False)
 
+    # Popularity endpoint only
+    popularity: Optional[Popularity] = field(default=None, compare=False)
+
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -70,6 +74,7 @@ class Player(CRObject):
         self.league_stats = PlayerLeagueStats.de_json(self.league_stats, self.client)
         self.cards = Card.de_list(self.cards, self.client)
         self.achievements = Achievement.de_list(self.achievements, self.client)
+        self.popularity = Popularity.de_json(self.popularity, self.client)
 
     def get_player(self, *args, **kwargs) -> "Player":
         return self.client.get_player(self.tag, *args, **kwargs)
