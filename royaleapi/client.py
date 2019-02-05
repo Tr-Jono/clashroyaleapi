@@ -217,6 +217,12 @@ class RoyaleAPIClient:
             data = self._get_methods_args_processor(f"clan/{tag}/warlog", max_results, page, timeout=timeout)
         return ClanWar.de_list(data, self)
 
+    def get_clan_history(self, clan_tag: str, use_cache: bool = True, timeout: Optional[int] = None) -> Dict[str, Clan]:
+        tag = validate_tag(clan_tag)
+        key = f"ch{tag}"
+        data = self._get_methods_with_tags_base("clan/{}/history", [tag], [key], use_cache, timeout=timeout)
+        return {k: Clan.de_json(v, self) for k, v in data.items()}
+
     def get_clan_tracking(self, clan_tags: str or List[str], *args: str, use_cache: bool = True,
                           timeout: Optional[int] = None) -> ClanTracking or List[ClanTracking]:
         tags, given_single_tag = self._tag_check(clan_tags, args)
@@ -272,9 +278,9 @@ class RoyaleAPIClient:
                   "inprep": filter_in_prep, "joinable": filter_joinable}
         if max_results is page is None:
             key = f"tk?1k={filter_1k}&o={filter_open}&f={filter_full}&p={filter_in_prep}&j={filter_joinable}"
-            data = self._get_methods_base("tournaments/known", key, use_cache, "dynamic", timeout=timeout, **kwargs)
+            data = self._get_methods_base("tournament/known", key, use_cache, "dynamic", timeout=timeout, **kwargs)
         else:
-            data = self._get_methods_args_processor("tournaments/known", max_results, page, timeout=timeout, **kwargs)
+            data = self._get_methods_args_processor("tournament/known", max_results, page, timeout=timeout, **kwargs)
         return Tournament.de_list(data, self)
 
     def search_tournaments(self, name: str, max_results: Optional[int] = None, page: Optional[int] = None,
@@ -282,9 +288,9 @@ class RoyaleAPIClient:
         assert name, "Parameter 'name' cannot be empty"
         if max_results is page is None:
             key = f"ts?n={name}"
-            data = self._get_methods_base("tournaments/search", key, use_cache, "dynamic", timeout=timeout, name=name)
+            data = self._get_methods_base("tournament/search", key, use_cache, "dynamic", timeout=timeout, name=name)
         else:
-            data = self._get_methods_args_processor("tournaments/search", max_results, page, timeout=timeout, name=name)
+            data = self._get_methods_args_processor("tournament/search", max_results, page, timeout=timeout, name=name)
         return Tournament.de_list(data, self)
 
     def get_top_players(self, location_key: str = None, max_results: Optional[int] = None, page: Optional[int] = None,

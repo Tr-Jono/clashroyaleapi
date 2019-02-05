@@ -41,7 +41,8 @@ class Player(CRObject):
     donations_received: Optional[int] = field(default=None, compare=False)
     donations_delta: Optional[int] = field(default=None, compare=False)  # Also in player leaderboard endpoint (somehow)
     donations_percent: Optional[float] = field(default=None, compare=False)
-    previous_rank: Optional[int] = field(default=None, compare=False)  # Also in player leaderboard endpoint
+    clan_rank: Optional[int] = field(default=None, compare=False)
+    previous_clan_rank: Optional[int] = field(default=None, compare=False)  # Also in player leaderboard endpoint
 
     # Battle participants only
     crowns_earned: Optional[int] = field(default=None, compare=False)
@@ -92,4 +93,8 @@ class Player(CRObject):
             data["level"] = data.pop("exp_level")
         if "creator" in data:
             data["is_creator"] = data.pop("creator")
+        if "previous_rank" in data:
+            data["previous_clan_rank"] = data.pop("previous_rank")
+        if "clan_chest_points" in data:
+            del data["clan_chest_points"]
         return cls(client=client, **data)

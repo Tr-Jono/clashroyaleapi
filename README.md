@@ -1,4 +1,8 @@
-# clashroyaleapi v0.2.1
+# clashroyaleapi v0.2.2
+
+*Note: The API is having issues with pagination,
+which corresponds to the parameters `max_results` and `page` in the client methods.
+You are not recommended to use them (they would not work regardless), especially if you set the client to cache data.*
 
 A sync __Python 3.6+__ wrapper for [RoyaleAPI](https://royaleapi.com/). (WIP)
 
@@ -106,3 +110,12 @@ print(t2 - t1, t3 - t2, t4 - t3, p1 == p2 == p3, sep=", ")
 # The second call takes the shortest time since the data is cached locally.
 # The third call takes less time than the first call since the data is cached on RoyaleAPI's server.
 ```
+
+## Unfinished endpoints
+- `/tournament/global`
+- `/popular/clan`
+- `/popular/player`
+- `/popular/tournament`
+- `/popular/deck`
+- `/constants` (figuring out how to implement)
+- `/clan/:tag/history/weekly` (not working, API issue)

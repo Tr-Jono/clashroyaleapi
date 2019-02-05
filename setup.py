@@ -6,7 +6,7 @@ with open("README.md", encoding="utf-8") as f:
 setup(
     name="clashroyaleapi",
     python_requies=">=3.6",
-    version="0.2.1",
+    version="0.2.2",
     description="A sync Python 3.6+ wrapper for RoyaleAPI.",
     long_description=long_description,
     long_description_content_type="text/markdown",

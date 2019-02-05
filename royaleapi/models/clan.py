@@ -5,6 +5,7 @@ from royaleapi.models.base import CRObject
 from royaleapi.models.clan_badge import ClanBadge
 from royaleapi.models.clan_tracking import ClanTracking
 from royaleapi.models.location import Location
+from royaleapi.constants import ClanRole
 
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
@@ -15,8 +16,9 @@ if TYPE_CHECKING:
 
 @dataclass
 class Clan(CRObject):
-    tag: str
-    name: str = field(compare=False)
+    # All endpoints except history
+    tag: Optional[str] = None
+    name: Optional[str] = field(default=None, compare=False)
 
     # Most endpoints have this
     badge: Optional[ClanBadge] = field(default=None, compare=False)
@@ -27,14 +29,14 @@ class Clan(CRObject):
     # Clan endpoint only
     description: Optional[str] = field(default=None, compare=False)
     clan_type: Optional[str] = field(default=None, compare=False)
-    score: Optional[int] = field(default=None, compare=False)  # Also in clan leaderboard endpoint
+    score: Optional[int] = field(default=None, compare=False)  # Also in clan leaderboard & history endpoint
     war_trophies: Optional[int] = field(default=None, compare=False)  # Also in clan war endpoint
-    member_count: Optional[int] = field(default=None, compare=False)  # Also in clan leaderboard endpoint
+    member_count: Optional[int] = field(default=None, compare=False)  # Also in clan leaderboard & history endpoint
     required_score: Optional[int] = field(default=None, compare=False)
     total_donations: Optional[int] = field(default=None, compare=False)
     location: Optional[Location] = field(default=None, compare=False)  # Also in clan leaderboard endpoint
     # Not returned in "clan/search" endpoint
-    members: List["Player"] = field(default_factory=list, compare=False)
+    members: List["Player"] = field(default_factory=list, compare=False)  # Also in history endpoint
     tracking: Optional[ClanTracking] = field(default=None, compare=False)
 
     # Player endpoint only
@@ -68,9 +70,6 @@ class Clan(CRObject):
     def get_clan(self, *args, **kwargs) -> "Clan":
         return self.client.get_clan(self.tag, *args, **kwargs)
 
-    def get_members(self, *args, **kwargs) -> List["Player"]:
-        return self.client.get_players([p.tag for p in self.members], *args, **kwargs)
-
     def get_battles(self, *args, **kwargs) -> List["Battle"]:
         return self.client.get_clan_battles(self.tag, *args, **kwargs)
 
@@ -80,11 +79,29 @@ class Clan(CRObject):
     def get_war_log(self, *args, **kwargs) -> List["ClanWar"]:
         return self.client.get_clan_war_log(self.tag, *args, **kwargs)
 
+    def get_history(self, *args, **kwargs) -> Dict[str, "Clan"]:
+        return self.client.get_clan_history(self.tag, *args, **kwargs)
+
     def get_tracking(self, *args, **kwargs) -> ClanTracking:
         return self.client.get_clan_tracking(self.tag, *args, **kwargs)
 
     def track(self, *args, **kwargs) -> bool:
         return self.client.track_clan(self.tag, *args, **kwargs)
+
+    def get_leader(self) -> "Player":
+        if not self.members:
+            raise ValueError("No members")
+        return [p for p in self.members if p.role == ClanRole.LEADER][0]
+
+    def get_co_leaders(self) -> List["Player"]:
+        if not self.members:
+            raise ValueError("No members")
+        return [p for p in self.members if p.role == ClanRole.CO_LEADER]
+
+    def get_elders(self) -> List["Player"]:
+        if not self.members:
+            raise ValueError("No members")
+        return [p for p in self.members if p.role == ClanRole.ELDER]
 
     @classmethod
     def de_json(cls, data: Dict[str, Any], client: "RoyaleAPIClient") -> Optional["Clan"]:
