@@ -4,6 +4,7 @@ from typing import List, Dict, Optional, Any, TYPE_CHECKING
 
 from royaleapi.models.base import CRObject
 from royaleapi.models.player import Player
+from royaleapi.models.popularity import Popularity
 
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient
@@ -23,17 +24,20 @@ class Tournament(CRObject):
     end_time: Optional[int] = field(compare=False)
     duration: int = field(compare=False)
 
-    # Only from tournament get and search
+    # Only from tournament get and search and popularity
     description: Optional[str] = field(default=None, compare=False)
     updated_at: Optional[int] = field(default=None, compare=False)
     creator: Optional[Player] = field(default=None, compare=False)  # Not in tournament search
     players: Optional[List[Player]] = field(default_factory=list, compare=False)  # empty if tournament search
+
+    popularity: Optional[Popularity] = field(default=None, compare=False)
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         self.creator = Player.de_json(self.creator, self.client)
         self.players = Player.de_list(self.players, self.client)
+        self.popularity = Popularity.de_json(self.popularity, self.client)
 
     def create_datetime(self, *args, **kwargs) -> datetime:
         return datetime.fromtimestamp(self.create_time, *args, **kwargs)

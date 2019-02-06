@@ -297,6 +297,11 @@ class RoyaleAPIClient:
         data = self._get_methods_base("popular/clan", key, use_cache, timeout=timeout)
         return Clan.de_list(data, self)
 
+    def get_popular_tournaments(self, use_cache: bool = True, timeout: Optional[int] = None) -> List[Tournament]:
+        key = "pt"
+        data = self._get_methods_base("popular/tournament", key, use_cache, timeout=timeout)
+        return Tournament.de_list(data, self)
+
     def get_version(self, use_cache: bool = True, timeout: Optional[int] = None) -> str:
         return self._get_methods_base("version", "v", use_cache, cache_type="server_info",
                                       return_text=True, timeout=timeout)

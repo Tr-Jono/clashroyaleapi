@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any, TYPE_CHECKING
 
+from royaleapi.constants import ClanRole
 from royaleapi.models.base import CRObject
 from royaleapi.models.clan_badge import ClanBadge
 from royaleapi.models.clan_tracking import ClanTracking
 from royaleapi.models.location import Location
 from royaleapi.models.popularity import Popularity
-from royaleapi.constants import ClanRole
 
 if TYPE_CHECKING:
     from royaleapi.client import RoyaleAPIClient

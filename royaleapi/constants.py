@@ -50,7 +50,7 @@ class ClanWarState:
     WAR_DAY = "warDay"
 
 
-class TournamentState:
+class TournamentStatus:
     IN_PREPARATION = "inPreparation"
     IN_PROGRESS = "inProgress"
     ENDED = "ended"

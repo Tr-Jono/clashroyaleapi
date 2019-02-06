@@ -62,12 +62,12 @@ client.get_players(*p)
 client.get_players(tuple(p))
 client.get_players(set(p))
 client.get_players(dict.fromkeys(p))
-client.get_players(tag for tag in p)   # If you want to do this somehow
+client.get_players(tag for tag in p)
 ```
 
 ## Short examples of using the wrapper
 Player/Clan/Tournament tags will be "corrected" and validated before requesting the API.
-### Example 1: `with` statement
+### ~~Example 1: `with` statement~~ (Will throw an error)
 ```python
 import royaleapi
 
@@ -83,7 +83,6 @@ with royaleapi.RoyaleAPIClient("YOUR_DEVELOPER_KEY") as client:
 # False, True
 # [('新香港部落123', '花果山劉德華', 5073), ('香港部落·二部', 'Gnuelnam', 4479)]
 ```
-(One clan has been deleted, you will get an error trying this. Example will be updated later.)
 
 ### Example 2: Using cached data
 ```python
@@ -109,9 +108,8 @@ print(t2 - t1, t3 - t2, t4 - t3, p1 == p2 == p3, sep=", ")
 # The third call takes less time than the first call since the data is cached on RoyaleAPI's server.
 ```
 
-## Unfinished endpoints
-- `/popular/tournament`
+## Unfinished endpoints <sub><sup>(Ordered by priority)</sup></sub>
 - `/popular/deck`
-- `/tournament/global` (waiting for next global tournament)
+- `/tournament/global` (only `{"active": bool}`, if API authors finish the full endpoint, it will be implemented)
 - `/constants` (figuring out how to implement)
 - `/clan/:tag/history/weekly` (not working, API issue)

@@ -13,6 +13,7 @@ class Popularity(CRObject):
     hits_per_day_avg: float
 
     def __post_init__(self):
+        self.hits = int(self.hits)
         self.hits_per_day_avg = float(self.hits_per_day_avg)
 
     @classmethod
