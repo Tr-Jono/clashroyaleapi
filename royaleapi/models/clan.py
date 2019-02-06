@@ -5,6 +5,7 @@ from royaleapi.models.base import CRObject
 from royaleapi.models.clan_badge import ClanBadge
 from royaleapi.models.clan_tracking import ClanTracking
 from royaleapi.models.location import Location
+from royaleapi.models.popularity import Popularity
 from royaleapi.constants import ClanRole
 
 if TYPE_CHECKING:
@@ -26,7 +27,7 @@ class Clan(CRObject):
     # Tournament endpoint only
     badge_id: Optional[int] = field(default=None, compare=False)
 
-    # Clan endpoint only
+    # Clan and popularity endpoint only
     description: Optional[str] = field(default=None, compare=False)
     clan_type: Optional[str] = field(default=None, compare=False)
     score: Optional[int] = field(default=None, compare=False)  # Also in clan leaderboard & history endpoint
@@ -58,6 +59,9 @@ class Clan(CRObject):
     rank: Optional[int] = field(default=None, compare=False)
     previous_rank: Optional[int] = field(default=None, compare=False)
 
+    # Popularity endpoint only
+    popularity: Optional[Popularity] = field(default=None, compare=False)
+
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -66,6 +70,7 @@ class Clan(CRObject):
         self.location = Location.de_json(self.location, self.client)
         self.members = Player.de_list(self.members, self.client)
         self.tracking = ClanTracking.de_json(self.tracking, self.client)
+        self.popularity = Popularity.de_json(self.popularity, self.client)
 
     def get_clan(self, *args, **kwargs) -> "Clan":
         return self.client.get_clan(self.tag, *args, **kwargs)

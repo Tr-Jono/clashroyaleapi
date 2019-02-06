@@ -29,18 +29,18 @@ to obtain your developer key.
 ## Currently Supported Methods
 Methods with an alias indicate that multiple tags can be passed to them.
 ```python
-client.get_player()          # alias: client.get_players()
-client.get_player_chests()   # alias: client.get_players_chests()
-client.get_player_battles()  # alias: client.get_players_battles()
-client.get_clan()            # alias: client.get_clans()
+client.get_player()            # alias: client.get_players()
+client.get_player_chests()     # alias: client.get_players_chests()
+client.get_player_battles()    # alias: client.get_players_battles()
+client.get_clan()              # alias: client.get_clans()
 client.get_clan_battles()
 client.get_clan_war()
 client.get_clan_war_log()
 client.get_clan_history()
-client.get_clan_tracking()   # alias: client.get_clans_tracking()
-client.track_clan()          # alias: client.track_clans()
+client.get_clan_tracking()     # alias: client.get_clans_tracking()
+client.track_clan()            # alias: client.track_clans()
 client.search_clans()
-client.get_tournament()      # alias: client.get_tournaments()
+client.get_tournament()        # alias: client.get_tournaments()
 client.get_known_tournaments()
 client.search_tournaments()
 client.get_top_players()
@@ -110,7 +110,6 @@ print(t2 - t1, t3 - t2, t4 - t3, p1 == p2 == p3, sep=", ")
 ```
 
 ## Unfinished endpoints
--  `/popular/clan`
 - `/popular/tournament`
 - `/popular/deck`
 - `/tournament/global` (waiting for next global tournament)
