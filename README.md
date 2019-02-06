@@ -109,7 +109,6 @@ print(t2 - t1, t3 - t2, t4 - t3, p1 == p2 == p3, sep=", ")
 ```
 
 ## Unfinished endpoints <sub><sup>(Ordered by priority)</sup></sub>
-- `/popular/deck`
 - `/tournament/global` (only `{"active": bool}`, if API authors finish the full endpoint, it will be implemented)
 - `/constants` (figuring out how to implement)
 - `/clan/:tag/history/weekly` (not working, API issue)

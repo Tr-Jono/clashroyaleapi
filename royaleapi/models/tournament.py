@@ -24,12 +24,13 @@ class Tournament(CRObject):
     end_time: Optional[int] = field(compare=False)
     duration: int = field(compare=False)
 
-    # Only from tournament get and search and popularity
+    # Tournament get and search and popularity endpoints only
     description: Optional[str] = field(default=None, compare=False)
     updated_at: Optional[int] = field(default=None, compare=False)
     creator: Optional[Player] = field(default=None, compare=False)  # Not in tournament search
     players: Optional[List[Player]] = field(default_factory=list, compare=False)  # empty if tournament search
 
+    # Only popularity endpoint
     popularity: Optional[Popularity] = field(default=None, compare=False)
 
     client: Optional["RoyaleAPIClient"] = field(default=None, repr=False, compare=False)

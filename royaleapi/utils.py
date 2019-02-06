@@ -1,10 +1,14 @@
 import re
 import time
 from collections import OrderedDict
-from typing import Tuple, Generator, Iterable, Any, Optional
+from statistics import mean
+from typing import List, Tuple, Generator, Any, Optional, TYPE_CHECKING
 
 from royaleapi.constants import VALID_TAG_CHARS
 from royaleapi.error import InvalidTag
+
+if TYPE_CHECKING:
+    from royaleapi.models import Card
 
 FIRST_CAP_REGEX = re.compile("(.)([A-Z][a-z]+)")
 ALL_CAP_REGEX = re.compile("([a-z0-9])([A-Z])")
@@ -25,10 +29,13 @@ def validate_tag(tag: str) -> str:
     return tag
 
 
+def average_elixir(cards: List["Card"]) -> float:
+    return float(mean([c.elixir for c in cards]))
+
+
 class ExpiringDict(OrderedDict):
     # Users should purge the dict themselves if they access client cache or use this dict for other purposes
-    def __init__(self, *args: Iterable[Iterable[Any]], timeout: int = 300, capacity: Optional[int] = None,
-                 **kwargs: Any) -> None:
+    def __init__(self, *args: Any, timeout: int = 300, capacity: Optional[int] = None, **kwargs: Any) -> None:
         assert timeout > 0 and (isinstance(capacity, int) or capacity is None)
         super().__init__(*args, **kwargs)
         self.timeout = timeout

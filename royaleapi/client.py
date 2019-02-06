@@ -8,7 +8,7 @@ from requests.exceptions import ConnectTimeout, ReadTimeout, ConnectionError
 
 from royaleapi.constants import ClanBattleType
 from royaleapi.error import RoyaleAPIError, InvalidToken, RequestTimeout, ServerResponseInvalid, error_dict
-from royaleapi.models import Battle, ChestCycle, Clan, ClanTracking, ClanWar, Player, ServerStatus, Tournament
+from royaleapi.models import Battle, ChestCycle, Clan, ClanTracking, ClanWar, Deck, Player, ServerStatus, Tournament
 from royaleapi.utils import is_iterable, validate_tag, ExpiringDict
 
 
@@ -301,6 +301,11 @@ class RoyaleAPIClient:
         key = "pt"
         data = self._get_methods_base("popular/tournament", key, use_cache, timeout=timeout)
         return Tournament.de_list(data, self)
+
+    def get_popular_decks(self, use_cache: bool = True, timeout: Optional[int] = None) -> List[Deck]:
+        key = "pd"
+        data = self._get_methods_base("popular/deck", key, use_cache, timeout=timeout)
+        return Deck.de_list(data, self)
 
     def get_version(self, use_cache: bool = True, timeout: Optional[int] = None) -> str:
         return self._get_methods_base("version", "v", use_cache, cache_type="server_info",
